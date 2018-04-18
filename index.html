@@ -27,12 +27,60 @@
         </nav>
     </header>
     <section id="main-content">
+        <article>
+            <h2>
+                Das erste Projekt: Ein Kartenspiel
+            </h2>
+            <h3>von Martin Grotz, 2018-04-18</h3>
+            <p>Am einfachsten lernt man mit einer neuen Programmiersprache meiner Meinung nach umzugehen, indem man ein konkretes
+                kleines Projekt in Angriff nimmt.</p>
+            <p>Viele der Herausforderungen zeigen sich nämlich erst, wenn man zumindest ein klein wenig über Hello World hinausgeht.</p>
+            <p>Da es aber auch nicht zu kompliziert werden soll, habe ich mich für eine Einzelspieler-Browser-only-Variante
+                eines Kartenspiels entschieden:
+                <br> Die Regeln des Spiels "Schnarch Schnarch" sind überschaubar und auch im
+                <a href="http://www.spielanleitung.com/spiel.php4?id=1899">Internet verfügbar</a>.
+            </p>
+            <p>Im Laufe der Entwicklung werde ich auch immer wieder mal Artikel einschieben, die jeweils Funktionalität oder
+                Syntax von Elm erklären, die ich danach dann gebrauchen werde. So wird es nicht zu viel trockene Theorie,
+                aber sie fällt auch nicht ganz untern den Tisch!</p>
+
+            <p>Jetzt ist aber erstmal nur das Anlegen des Projektskeletts dran. Hierzu verwenden wir erneut die praktischen
+                Befehle, die uns
+                <a href="https://github.com/halfzebra/create-elm-app">create-elm-app</a> zur Verfügung stellt:
+                <code>elm-app create schnarchschnarch-sp-elm</code>
+            </p>
+
+            <p>Anschließend wird erstmal aufgeräumt: Im
+                <code class="inline">public</code>-Ordner, der die statischen Ressourcen enthält, werfen wir alles außer
+                <code class="inline">index.html</code>weg.</p>
+
+            <p>Nun folgt noch der
+                <code class="inline">source</code>-Ordner, der den eigentlichen Elm-Quellcode enthält. Hier entfernen wir in der
+                <code class="inline">index.js</code>-Datei erstmal die Verbindung zum ServiceWorker durch das Löschen der Zeilen
+                <code>import registerServiceWorker from './registerServiceWorker';</code> und
+                <code>registerServiceWorker();</code> Die zugehörige Datei
+                <code class="inline">registerServiceWorker.js</code> wird gelöscht.
+            </p>
+
+            <p>
+                In
+                <code class="inline">Main.elm</code> - dem Einsprungpunkt jedes Elm-Programms - vereinfachen wir die
+                <code class="inline">view</code>-Funktion derart, dass sie folgendermaßen aussieht:
+                <pre><code>view : Model -> Html Msg
+view model =
+    div [] []</code></pre> Dadurch wird nurmehr eine Seite mit einem leeren
+                <code class="inline">div</code> erzeugt.
+            </p>
+
+            <p>Damit ist die Leinwand vorbereitet, um jetzt mit dem nächsten Schritt weitermachen zu können: Die Fachdomäne
+                analysieren und daraus möglichst gute Typdefinitionen zu erstellen.</p>
+        </article>
 
         <article>
             <h2>Elm-Schnellstart</h2>
             <h3>von Martin Grotz, 2018-04-17</h3>
             <p>Die Installation von Elm ist sehr einfach. Die einzige Voraussetzung ist ein aktuelles
-                <a href="https://nodejs.org">node.js</a>.</p>
+                <a href=" https://nodejs.org ">node.js</a>.</p>
             <p>Anschließend kann man alle wichtigen Tools und die Programmiersprache selbst mit einem einzigen Befehl herunterladen:
                 <code>npm install elm elm-format create-elm-app --global</code> Danach können wir uns schon eine erste App erzeugen und in den neu erzeugten Ordner wechseln:
                 <code>elm-app create hello-world
@@ -44,6 +92,14 @@
                 <code>http://localhost:3000/</code>
             </p>
         </article>
+
+        <!-- <article>
+            <h2>
+
+            </h2>
+            <h3></h3>
+            <p></p>
+        </article> -->
     </section>
 </body>
 
