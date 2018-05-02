@@ -6,6 +6,7 @@
     <meta name="description" content="Ein Blog zur funktionalen Frontend-Programmiersprache Elm">
     <meta name="keywords" content="elm, functional, programming, funktional, funktionale programmierung, spa, web, frontend">
     <link rel="stylesheet" href="main.css">
+    <link rel="stylesheet" href="/highlightjs-styles/sunburst.css">
     <title>Elm - finde ich super!</title>
 </head>
 
@@ -27,6 +28,102 @@
         </nav>
     </header>
     <section id="main-content">
+        <article>
+            <h2>
+                Coole Typen - Teil 1
+            </h2>
+            <h3>von Martin Grotz, 2018-05-02</h3>
+            <p>
+                Bevor wir mit dem Umsetzen der Fachdomäne in Elm-Typen anfangen können müssen wir natürlich wissen, welche Typen es in Elm
+                überhaupt gibt und was wir damit jeweils machen können. Im ersten Teil der dreiteiligen Artikel-Reihe geht
+                es um die grundlegenden Typen:
+                <section>
+                    <h4>
+                        Primitive Typen
+                    </h4>
+                    Es gibt in Elm eine Reihe von grundlegenden Typen, die dann zu anderen Typen zusammengesetzt werden. Im Detail sind das:
+                    <ul>
+                        <li>Char: Einzelnes Zeichen</li>
+                        <li>String: Zeichenketten</li>
+
+                        <li>Bool: True oder False, um einen Wert darzustellen, der entweder Wahr oder Unwahr sein kann</li>
+                        <li>Int: Ganze Zahl</li>
+                        <li>Float: Kommazahl</li>
+                        <li>number: Kann entweder Int oder Float sein - je nach tatsächlicher Verwendung</li>
+                    </ul>
+
+                    Als Elm-Code sieht das dann jeweils so aus:
+                    <pre><code>c : Char
+c =
+    'a'
+
+s : String
+s =
+    "Zeichenkette"
+
+b : Bool
+b =
+    True
+
+i : Int
+i =
+    42
+
+f : Float
+f =
+    3.1415
+
+n1 : number
+n1 =
+    42
+
+n2 : number
+n2 =
+    3.1415</code></pre>
+                </section>
+
+                <section>
+                    <h4>Records</h4>
+                    <p>Records sind unveränderliche Datenstrukturen, die aus mehreren Werten zusammengesetzt sind. Sie werden
+                        in Elm für gewöhnlich als Type-Alias definiert - theoretisch kann man aber auch direkt einen Record
+                        an Ort und Stelle definieren, ohne vorher einen passenden Type-Alias angelegt zu haben.
+                    </p>
+                    <p>Wichtig: Records in Elm werden über ihren Inhalt verglichen - nicht über ihre Referenz. Außerdem: Records
+                        in Elm erfüllen dann eine Funktions-Signatur, wenn sie strukturell passen.</p>
+                    <p>In Elm-Code sieht das dann so aus:</p>
+                    <pre><code>-- Record
+somePoint =
+    { x = 3, y = -1 }
+
+-- Record mit dazugeschriebener Typdefinition
+aPoint : { x : Int, y : Int }
+aPoint =
+    { x = 3, y = -1 }
+
+-- Record Type für einfachere wiederholte Verwendung
+type alias Point =
+    { x : Int, y : Int }
+
+anotherPoint : Point
+anotherPoint =
+    { x = 3, y = -1 }
+
+-- beide Records erfüllen die Funktions-Signatur von someFunc, weil die Struktur jeweils passt
+someFunc : Point -> Point -> Point
+someFunc p1 p2 =
+    { x = p1.x + p2.x, y = p1.y + p2.y }
+
+x =
+    someFunc somePoint anotherPoint</code></pre>
+
+                    <p>Noch mehr Infos zu Records gibt es
+                        <a href="http://elm-lang.org/docs/records">in der offiziellen Elm-Doku</a>.</p>
+                </section>
+            </p>
+
+            <p>Im nächsten Teil der Serie geht es dann um Union Types und Listen.</p>
+        </article>
+
         <article>
             <h2>
                 A Cure for Runtime Errors - Vortrag vom MATHEMA Campus 2018
@@ -116,6 +213,9 @@ view model =
             <p></p>
         </article> -->
     </section>
+
+    <script src="./highlight.pack.js"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
 </body>
 
 </html>
