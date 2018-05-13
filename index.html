@@ -30,6 +30,54 @@
     <section id="main-content">
         <article>
             <h2>
+                Coole Typen - Teil 2
+            </h2>
+            <h3>von Martin Grotz, 2018-05-13</h3>
+            <p>
+                Wie angekündigt geht es in diesem Teil der Elm-Typen-Betrachung um Listen und Union Types. Beginnen wollen wir hierbei mit
+                den Listen. Listen sind in Elm das Standardmittel um Mengen von Elementen zu verwalten. Listen sind, genau
+                wie alle anderen Datentypen in Elm, unveränderlich ("immutable"), d.h. fügt man ein Element hinzu oder entfernt
+                eines, so bekommt man immer eine Kopie der Liste zurück - das Original bleibt unverändert bestehen.
+            </p>
+            <p>
+                Listen werden einfach mit eckigen Klammern definiert. Mehrere Elemente trennt man mit einem Komma:
+            </p>
+            <pre><code>liste =
+[ 1, 2, 3, 5, 7, 11 ]</code></pre>
+            <p>Es gibt auch einige andere Möglichkeiten, Listen zu erzeugen. Hierzu verweise ich auf die
+                <a href="http://package.elm-lang.org/packages/elm-lang/core/latest/List">Elm-Dokumentation zur Liste</a>.</p>
+            <p>Es gibt auch noch eine Menge weiterer Funktionen, die auf Listen operieren. Besonders hervorheben möchte ich
+                hier die Möglichkeit, via
+                <code class="inline">head</code> auf das erste Element einer Liste zugreifen zu können - das machen wir uns in einem späteren Eintrag beim
+                Einführen des Pattern Matching zu nutze, und
+                <code class="inline">map</code>. </p>
+            <p>Mit
+                <code class="inline">map</code> kann man über alle Elemente einer Liste iterieren und auf jedes Element eine Funktion anwenden. Das Ergebnis
+                dieser Funktion wird dann an die gleiche Stelle einer neuen Liste geschrieben. Dies bildet eine mächtige
+                Möglichkeit, alle Elemente einer Liste zu transformieren.</p>
+            <pre><code>-- Listen
+liste : List Int
+liste =
+    [ 1, 2, 3, 5, 7, 11 ]
+
+quadriere : Int -> Int
+quadriere a =
+    a ^ a
+
+quadrierteListe : List Int
+quadrierteListe =
+    List.map quadriere liste</code></pre>
+            <p>Listen sind auch deshalb ein sehr wichtiger Bestandteil von Elm weil in allen view-Funktionen die HTML-Elemente
+                jeweils Funktionen sind, die einerseits eine Liste von Attributen, andererseits eine Liste mit Kindelementen
+                entgegennehmen. Daher kann man sich mit Hilfe der zahlreichen Listen-Funktionen sehr elegant seine HTML-Views
+                bauen.
+            </p>
+            <p>Für die Union Types gibt's dann doch noch einen eigenen Artikel, da diese vermutlich etwas mehr Raum und Zeit
+                in Anspruch nehmen werden.</p>
+        </article>
+
+        <article>
+            <h2>
                 Coole Typen - Teil 1
             </h2>
             <h3>von Martin Grotz, 2018-05-02</h3>

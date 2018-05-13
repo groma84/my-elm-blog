@@ -31,11 +31,6 @@ n1 =
     42
 
 
-n2 : number
-n2 =
-    3.1415
-
-
 
 -- Record
 
@@ -77,3 +72,22 @@ someFunc p1 p2 =
 
 x =
     someFunc somePoint anotherPoint
+
+
+
+-- Listen
+
+
+liste : List Int
+liste =
+    [ 1, 2, 3, 5, 7, 11 ]
+
+
+quadriere : Int -> Int
+quadriere a =
+    a ^ a
+
+
+quadrierteListe : List Int
+quadrierteListe =
+    List.map quadriere liste
