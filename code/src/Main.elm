@@ -91,3 +91,66 @@ quadriere a =
 quadrierteListe : List Int
 quadrierteListe =
     List.map quadriere liste
+
+
+type Hintergrundfarbe
+    = Rot
+    | Gelb
+    | Blau
+
+
+farbeZuHex : Hintergrundfarbe -> String
+farbeZuHex hintergrundfarbe =
+    case hintergrundfarbe of
+        Rot ->
+            "#ff0000"
+
+        Gelb ->
+            "#ffff00"
+
+        Blau ->
+            "#0000ff"
+
+
+type Gewicht
+    = Gewicht Float
+
+
+type Groesse
+    = Groesse Float
+
+
+type alias Bmi =
+    Float
+
+
+errechneBmi : Gewicht -> Groesse -> Bmi
+errechneBmi (Gewicht gewicht) (Groesse groesse) =
+    gewicht / (groesse * groesse)
+
+
+type alias Radius =
+    Float
+
+
+type alias Laenge =
+    Float
+
+
+type alias Breite =
+    Float
+
+
+type Form
+    = Kreis Radius
+    | Rechteck Laenge Breite
+
+
+flaeche : Form -> Float
+flaeche form =
+    case form of
+        Kreis radius ->
+            pi * (radius ^ 2)
+
+        Rechteck laenge breite ->
+            laenge * breite

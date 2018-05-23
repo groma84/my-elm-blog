@@ -30,6 +30,82 @@
     <section id="main-content">
         <article>
             <h2>
+                Coole Typen - Teil 3
+            </h2>
+            <h3>von Martin Grotz, 2018-05-23</h3>
+            <p>Jetzt geht es zu den Union Types. Diese haben sehr viele verschiedene Namen, je nach Programmiersprache oder
+                Community in der man sich bewegt: Union Types, Discriminated Unions, Tagged Unions, Algebraic Datatypes oder
+                auch Choice Types. Choice Types drückt für mich auch am ehesten aus, was man damit machen kann, ohne, dass
+                man das ganze Hintergrundwissen dazu braucht:
+                <br> Man kann damit eine feststehende, zur Kompilierzeit bereits bekannte Menge an verschiedenen Auswahlmöglichkeiten
+                beschreiben. Union Types sind das wohl wichtigste Werkzeug, um eine Fachdomäne sauber und inklusive der Vermeidung
+                von ungültigen Zuständen auszudrücken.
+            </p>
+            <p>Zuerst einmal schauen wir uns Union Types ohne zusätzliche Daten pro Auswahl an:</p>
+            <pre><code>type Hintergrundfarbe = Rot | Gelb | Blau</code></pre>
+            <p>Wenn wir nun in unserer Webseite je nach Hintergrundfarbe einen passenden CSS-Hexcode ausspucken wollen, können
+                wir eine Funktion schreiben, die mit einem
+                <code class="inline">case ... of</code> die verschiedenen Fälle auswertet. Das nennt man dann Pattern Matching:</p>
+            <pre><code>farbeZuHex : Hintergrundfarbe -> String
+farbeZuHex hintergrundfarbe =
+    case hintergrundfarbe of
+        Rot ->
+            "#ff0000"
+        Gelb ->
+            "#ffff00"              
+        Blau ->
+            "#0000ff"</code></pre>
+            <p>Wichtig ist dabei auch: Elm erzwingt immer die Behandlung aller Pfade. Man kann zwar mit
+                <code class="inline">_ -> ...</code> einen Standardfall festlegen, der immer dann ausgeführt wird, wenn kein anderer Zweig passt, aber dann hebelt
+                man einen wichtigen Schutzmechanismus gegen Programmierfehler aus, daher ist nicht unbedingt empfehlenswert.</p>
+            <p>Eine weitere wichtige Einsatzmöglichkeit von Union Types sind die sogenannten Single Case Union Types. Diese
+                dienen vor allem dazu, Funktionsparameter eindeutig festzulegen, so dass man nicht aus Versehen zum Beispiel
+                zwei Floats beim Aufruf verdreht. Dies zu nutzen erhöht die Lesbarkeit und Sicherheit des eigenen Codes deutlich!</p>
+            <pre><code>type Gewicht = Gewicht Float
+type Groesse = Groesse Float
+type alias Bmi = Float
+
+errechneBmi : Gewicht -> Groesse -> Bmi
+errechneBmi (Gewicht gewicht) (Groesse groesse) =
+    gewicht / (groesse * groesse)</code></pre>
+            <p>Im Gegensatz zu dem type alias Bmi, der letztendlich nur eine Umbenennung eines Floats darstellt, und damit auch
+                überall dort als Argument erlaubt ist, wo ein Float erwartet wird, sorgen die beiden Single Case Unions dafür,
+                dass die Reihenfolge wirklich eingehalten werden muss. Wäre die Funktionssignatur ein
+                <code class="inline">Float -> Float -> Float</code> bestündie die sehr große Gefahr, dass man Gewicht und Größe beim Aufruf vertauscht und dabei sinnlose Ergebnisse
+                erhält, obwohl der Compiler grünes Licht gibt.</p>
+            <p>In der berechneBmi-Funktion sieht man auch, wie man einen solchen Union Type auch gleich elegant "auspacken"
+                kann, so dass man direkt mit den "enthaltenen" Floats arbeiten kann.</p>
+            <p>Auch viele interne Typen von Elm sind eigentlich Union Types, zum Beispiel Boolean oder das später noch genauer
+                erläuterte Maybe bzw. Result.</p>
+            <p>Eine weitere wichtige Möglichkeit für den Einsatz von Union Types ist es, jedem einzelnen Fall unterschiedliche
+                Daten mitgeben zu können. Das macht sie wesentlich mächtiger als die aus vielen anderen Sprachen bekannten
+                switch-case-Statements:
+            </p>
+            <pre><code>type alias Radius = Float
+type alias Laenge = Float
+type alias Breite = Float
+
+type Form
+    = Kreis Radius
+    | Rechteck Laenge Breite
+
+flaeche : Form -> Float
+flaeche form =
+    case form of
+        Kreis radius ->
+            pi * (radius ^ 2)
+
+        Rechteck laenge breite ->
+            laenge * breite</code></pre>
+            <p>Durch die geschickte Kombination von Union Types kann man innerhalb seiner Fachdomäne eine auch für Domänenexperten,
+                die sich mit Programmierung nicht so gut auskennen, gut verständliche Beschreibung erstellen, die dann auch
+                noch beim Programmieren wenig fehleranfällig ist. Deshalb bilden Union Types meist das Rückgrat jeder Elm-Typbeschreibung.</p>
+            <p>Die ausführlichere offizielle Doku zum Thema findet sich
+                <a href="https://guide.elm-lang.org/types/union_types.html">auf der Elm-Seite</a>.</p>
+        </article>
+
+        <article>
+            <h2>
                 Coole Typen - Teil 2
             </h2>
             <h3>von Martin Grotz, 2018-05-13</h3>
@@ -178,10 +254,11 @@ x =
             </h2>
             <h3>von Martin Grotz, 2018-04-22</h3>
             <p>
-                Ich hatte kürzlich die wunderbare Gelegenheit, auf dem
-                <a href="https://www.mathema.de/veranstaltungen/mathema-campus">MATHEMA Campus</a> einen Vortrag über Elm zu halten. Schwerpunkt war hierbei, wie Elm dabei hilft, Laufzeitfehler
-                in Web-Frontends zu verhindern. Daher hieß der Vortrag dann auch
-                <em>"A Cure for Runtime Errors - Funktionale fehlerfreie Frontends mit Elm"</em>. Ich habe die Folien zum Vortrag
+                Ich hatte kürzlich die Gelegenheit, auf dem internen
+                <a href="https://www.mathema.de/veranstaltungen/mathema-campus">MATHEMA Campus</a> vor einer Handvoll Zuhörer aus dem "Family&Friends"-Bereich meines Arbeitgebers einen
+                kurzen Vortrag über Elm zu halten. Schwerpunkt war hierbei, wie Elm dabei hilft, Laufzeitfehler in Web-Frontends
+                zu verhindern. Daher hieß der Vortrag dann auch
+                <em>"A Cure for Runtime Errors</em>. Ich habe die Folien zum Vortrag
                 <a href="https://elm.finde-ich-super.de/vortrag-mathemacampus-2018">als HTML-Seite hochgeladen</a>.
             </p>
             <p>Die Code-Beispiele finden sich
