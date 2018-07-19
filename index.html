@@ -31,6 +31,38 @@
     <section id="main-content">
         <article>
             <h2>
+                Coole Typen - Teil 4
+            </h2>
+            <h3>von Martin Grotz, 2018-07-19</h3>
+            <p>
+                Im letzten Teil der Typen-Serie zu Elm geht es um zwei wichtige Konzepte, die einen großen Anteil daran haben, dass Elm seine
+                "keine Laufzeitfehler"-Garantie wirklich leben kann: Maybe und Result.
+                <br>
+                <pre><code>type Maybe a
+    = Just a
+    | Nothing</code></pre> Mit Maybe lässt sich der Fall ausdrücken, dass es einen Wert gibt - oder eben nicht. Mein bisher häufigster
+                Anwendungsfall dafür sind optionale Eingabefelder. Ist kein Wert drin, haben wir eben Nothing. Und sobald
+                was eingegeben wurde, ist Just a drin. Sonst benutzt man es auch für Funktionsparameter, die nicht unbedingt
+                gesetzt sein müssen.
+                <br> Elm kommt also zur Darstellung von "hier könnte was sein oder auch nicht" ohne Magic Values und auch ohne
+                das gemeine NULL aus, das schon für so viel Kummer gesorgt hat.
+                <br> Hat man nun aber einen Vorgang, der auch fehlschlagen kann, und man möchte auch die Information behalten,
+                was genau schief gegangen ist, so gibt es dafür den Result-Datentyp:
+                <pre><code>type Result error value
+    = Ok value
+    | Err error</code></pre> Hat alles geklappt, so steckt das Ergebnis im Ok. Gab es aber einen Fehler, so steckt dieser im Err-Fall.
+                <br> Sowohl Maybe als auch Result sind im Endeffekt nur clever definierte Union Types. Und weil jeder Fehlerfall
+                entweder über ein Maybe oder Result ausgedrückt wird, und wir bei Union Types verpflichtend alle definierten
+                Fälle behandeln müssen, müssen wir uns für jede Stelle in unserem Programm überlegen, wie wir mit dem jeweiligen
+                Fehlerfall genau umgehen. Dadurch können keine Fälle vergessen werden und es gibt keine unerwarteten Überraschungen
+                zur Laufzeit.
+                <br> Bei unserem ersten Projekt, einem kleinen Spiel, werden uns Maybe und Result allerdings eher selten begegnen,
+                da dieses ohne Server oder komplizierte Daten-Konvertierungen auskommt. Hier haben wir fast alles selbst
+                in der Hand und bewegen uns nur in der geschützten Elm-Welt.
+            </p>
+        </article>
+        <article>
+            <h2>
                 Sicherheits-Upgrade im Hintergrund
             </h2>
             <h3>von Martin Grotz, 2017-07-03</h3>
