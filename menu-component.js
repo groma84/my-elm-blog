@@ -36,6 +36,7 @@ const MenuComponent = {
 
         <aside class="social_media_stuff">
             <ul>
+                <li><a href="https://www.meetup.com/de-DE/Lambda-Lounge-Funktionale-Programmierung-Nurnberg/">FP Meetup Nürnberg</a></li>
                 <li><a href="https://github.com/groma84">Github</a></li>
                 <li><a href="https://twitter.com/mobilgroma">Twitter</a></li>
                 <li><a href="https://www.xing.com/profile/Martin_Grotz3/cv">Xing</a></li>
