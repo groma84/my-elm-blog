@@ -32,15 +32,3 @@ h3 {
   margin-top: 0.25rem;
 }
 
-nav > ul {
-  display: flex;
-  list-style: none;
-  margin: 0;
-  padding: 0;
-}
-
-nav > ul > li {
-  margin: 0.5rem;
-  padding: 0.5rem;
-  background-color: lightblue;
-}

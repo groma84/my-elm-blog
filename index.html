@@ -7,29 +7,16 @@
     <meta name="keywords" content="elm, elixir, erlang, OTP, functional, programming, funktional, funktionale programmierung, spa, web, frontend">
     <meta name="referrer" content="no-referrer">
     <link rel="stylesheet" href="main.css">
-    <link rel="stylesheet" href="/highlightjs-styles/sunburst.css">
+    <link rel="stylesheet" href="./highlightjs-styles/sunburst.css">
+    <script src="hybrids.js"></script>
+    <script src="menu-component.js"></script>
     <title>Elm (und Elixir) - finde ich super!</title>
 </head>
 
 <body>
-    <header>
+    <header id="header">
         <h1>Elm (und Elixir) - finde ich super!</h1>
-        <nav>
-            <ul>
-                <li>
-                    <a href="index.html">Blog</a>
-                </li>
-                <li>
-                    <a href="faq.html">FAQ</a>
-                </li>
-                <li>
-                    <a href="datenschutz.html">Datenschutz</a>
-                </li>
-                <li>
-                    <a href="impressum.html">Impressum</a>
-                </li>
-            </ul>
-        </nav>
+        <menu-component></menu-component>
     </header>
     <section id="main-content">
         <article id="zusammenfassung_erstes_lambda_lounge_meetup">
@@ -779,6 +766,8 @@ view model =
     </section>
 
     <script src="./highlight.pack.js"></script>
+    <script src="ie11iscrap.js"></script>
+
 </body>
 
 </html>
