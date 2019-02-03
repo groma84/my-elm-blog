@@ -1,34 +1,78 @@
 body {
-  font-size: 17px;
-  margin: 1rem;
+    font-size: 17px;
+    margin: 1rem;
 }
 
 section {
-  max-width: 60rem;
+    max-width: 60rem;
 }
 
 code {
-  display: block;
-  background-color: lightblue;
-  padding: 1rem;
-  margin: 0.5rem 1rem;
+    display: block;
+    background-color: lightblue;
+    padding: 1rem;
+    margin: 0.5rem 1rem;
 }
 
 code.inline {
-  display: inline;
-  padding: 0;
-  margin: 0;
+    display: inline;
+    padding: 0;
+    margin: 0;
 }
 
 header {
-  border-bottom: 1px solid lightblue;
+    border-bottom: 1px solid lightblue;
 }
 
 h2 {
-  margin-top: 2rem;
-  margin-bottom: 0.25rem;
-}
-h3 {
-  margin-top: 0.25rem;
+    margin-top: 2rem;
+    margin-bottom: 0.25rem;
 }
 
+h3 {
+    margin-top: 0.25rem;
+}
+
+.events {
+    margin-top: 1.5rem;
+    border-spacing: 0;
+    border-collapse: collapse;
+}
+
+.events th {
+    font-weight: bold;
+    font-size: 1.5rem;
+    background-color: lightgray;
+    border: 1px solid black;
+    padding: 1rem;
+}
+
+.events td {
+    border-bottom: 1px solid black;
+}
+
+.events tr>td:last-child {
+    padding: 0.5rem 1.5rem;
+}
+
+.events tr>td:first-child {
+    text-align: center;
+    font-weight: bold;
+    padding: 1.5rem;
+}
+
+.event_link {
+    font-size: 1.5rem;
+}
+
+.event_link a {
+    text-decoration: none;
+}
+
+.event_location {
+    font-size: 1.25rem;
+}
+
+#main-content .events_ueberschrift:not(:nth-of-type(1)) {
+    margin-top: 4rem;
+}
