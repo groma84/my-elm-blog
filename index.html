@@ -21,6 +21,128 @@
         <menu-component></menu-component>
     </header>
     <section id="main-content">
+        <article id="phoenix_in_apache_linux_setup">
+            <h2>
+                Eine Elixir Phoenix App in Apache auf einem vServer hosten
+            </h2>
+            <h3>von Martin Grotz, 2019-06-23</h3>
+            <p>ACHTUNG: Der nachfolgende Eintrag ist eher eine Gedächtnisstütze für mich als ein richtig ausgearbeiteter
+                Blog-Post. Aber weil ich das selten mache, und es doch relativ viele Schritte sind, wollte ich sie
+                einfach mal festgehalten haben.</p>
+            <p>Das verbreitetste Release-Tooling für Elixir heißt distillery. Die Installationsanleitung dafür findet
+                sich <a href="https://hexdocs.pm/distillery/introduction/installation.html">hier</a>.</p>
+            <p>Nach einem kurzen Blick in die nach der Installation mit <code>mix release.init</code> erzeugte Datei
+                "rel/config.exs" kann ein erstes Probe-Release gebaut werden mit <code>MIX_ENV=prod mix release</code>
+            </p>
+            <p>Anschließend wird gemäß <a href="https://hexdocs.pm/phoenix/deployment.html#content">der Anleitung</a>
+                das Phoenix Zeugs gebaut.</p>
+            <p>Dann muss noch gemäß <a href="https://hexdocs.pm/distillery/guides/phoenix_walkthrough.html">Distillery
+                    mit Phoenix Walkthrough</a> die Konfiguration von Phoenix angepasst werden.</p>
+            <p>Außerdem brauchen wir einen Ecto Migrations Runner, da wir das ja nicht einfach so machen können. <a
+                    href="https://www.thegreatcodeadventure.com/run-ecto-migrations-in-production-distillery/">Diese
+                    Anleitung</a> hat mir dabei sehr geholfen.</p>
+
+            <p>Bei meinem vServer liegen die Webseiten alle in /var/www/html, also habe ich da einen neuen Unterordner
+                erstellt. Da wird dann die von distillery erzeugte .tar.gz Datei reingelegt und entpackt. Die Datei
+                wurde bei mir lokal unter "_build/prod/rel/run_for_your_lives/releases/0.1.0/" abgelegt.
+                Auf dem remote Server kann das Release dann mit
+                <code>PORT=4002 ./bin/run_for_your_lives foreground</code> probeweise gestartet werden. Erst, wenn da
+                alles glatt läuft, kümmere ich mich um die Einbindung in den Apache. ACHTUNG: Für das automatische
+                Starten später muss der Port in der "config/prod.exs" vor dem Distillery-Build hart kodiert werden!
+            </p>
+
+            <p>In meinem konkreten Fall muss ich jetzt erstmal PostgreSQL installieren und konfigurieren (alles auf
+                Debian buster):
+                Hilfreich dabei war die Kombination von <a href="https://wiki.postgresql.org/wiki/Apt">der PostgreSQL
+                    Anleitung für Debian</a> und <a href="https://wiki.debian.org/PostgreSql">der Installationsanleitung
+                    aus dem Debian Wiki</a>.
+                Und dazu noch das Debian Paket pgadmin4-apache2, damit es direkt in den Webserver eingebunden wurde, so
+                dass ich nicht mit den Kommandozeilen-Tools rumhantieren muss.
+                Die SQL-Daten habe ich vorher aus den lokal angelegten Produktiv-DBs via "Backup" in pgAdmin4 exportiert
+                und einfach als SQL direkt auf dem frisch installierten Server über das dort ebenfalls gerade erst
+                installierte pgAdmin4 über das Query Tool wieder eingespielt.
+            </p>
+            <p>Unter sites-available für meinen Apache musste ich dann noch zwei Dateien anlegen: Eine, die von http auf
+                https weiterleitet, und eine, die die https Anfrage an den Apache dann an die Erlang-App weiterleitet.
+                Für diese Weiterleitung brauchen wir noch zwei Erweiterungen (mods): mod_proxy_http und
+                mod_proxy_wstunnel.
+                Dann die erste Datei: "run_for_your_lives.conf" mit dem Inhalt:
+                <pre><code><VirtualHost run.finde-ich-super.de:80>
+                        ServerName run.finde-ich-super.de
+                    
+                        ServerAdmin martin.grotz@gmx.de
+                        DocumentRoot /var/www/html/run
+                    
+                        ErrorLog ${APACHE_LOG_DIR}/error.log
+                    
+                        RewriteEngine on
+                        RewriteCond %{SERVER_NAME} =run.finde-ich-super.de
+                        RewriteRule ^ https://%{SERVER_NAME}%{REQUEST_URI} [END,NE,R=permanent]
+                    </VirtualHost></code></pre>
+
+                Und dann noch die mit den Weiterleitungen auf die Erlang-Application und dem eigentlichen Setup:
+                <pre><code><IfModule mod_ssl.c>
+                        <VirtualHost run.finde-ich-super.de:443>
+                            ServerAdmin martin.grotz@gmx.de
+                            ServerName run.finde-ich-super.de
+                    
+                            ErrorLog ${APACHE_LOG_DIR}/run_for_your_lives_error.log
+                    
+                            SSLEngine on
+                    
+                            ServerName	run.finde-ich-super.de
+                            SSLCertificateFile <path to SSL Stuff from letsencryot>
+                            SSLCertificateKeyFile <path to SSL Stuff from letsencryot>
+                            Include /etc/letsencrypt/options-ssl-apache.conf
+                    
+                            ProxyPass /socket/ ws://localhost:4002/socket/
+                            ProxyPassReverse /socket/ ws://localhost:4002/socket/
+                            ProxyPass / http://localhost:4002/
+                            ProxyPassReverse / http://localhost:4002/
+                        </VirtualHost>
+                    </IfModule></code></pre>
+
+                Danach den Symlink setzen, damit in "sites-enabled" auch die passende Konfigurationsdatei aus
+                "sites-available" eingebunden ist.
+            </p>
+            <p>Jetzt noch einen Apache-Restart und dann mit "certbot" das Zertifikat um die neue Subdomain erweitern.
+            </p>
+            <p>Am Schluss
+                sollten wir unsere Erlang-Applikation noch direkt beim Hochfahren
+                starten, sonst laufen die Apache-Requests ins Leere.
+                Dazu muss eine Datei angelegt werden: "/lib/systemd/system/run_for_your_lives_phoenix.service", mit
+                ungefähr nachfolgendem Inhalt:
+                <pre><code>
+                    [Unit]
+                        Description=Run For Your Lives Phoenix App
+                        After=network.target
+
+                        [Service]
+                        Type=simple
+
+                        User=<username>
+                        Group=<usergroup>
+
+                        Restart=on-failure
+                        RestartSec=5
+
+                        Environment=LANG=de_DE.UTF-8
+
+                        WorkingDirectory=/var/www/html/run
+                        ExecStart=/var/www/html/run/bin/run_for_your_lives foreground
+                        RemainAfterExit=no
+                        SyslogIdentifier=run_for_your_lives
+
+                        [Install]
+                        WantedBy=multi-user.target
+                </code></pre>
+                Die müssen wir dann noch beim System bekannt machen: "systemctl enable
+                run_for_your_lives_phoenix.service". Anleitung übrigens <a
+                    href="https://elixirforum.com/t/elixir-apps-as-systemd-services-info-wiki/2400">aus dem Elixir
+                    Forum</a>
+            </p>
+
+        </article>
         <article id="meetup_und_dotnetday">
             <h2>
                 Lambda Lounge Meetup Anfang April & dotnet Day Franken
