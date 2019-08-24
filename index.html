@@ -21,6 +21,36 @@
         <menu-component></menu-component>
     </header>
     <section id="main-content">
+        <article id="rerun_command">
+            <h2>
+                "rerun" statt "mix test.watch"
+            </h2>
+            <h3>von Martin Grotz, 2019-08-24</h3>
+            <p>Ich habe in der hörenswerten Podcast-Folge 63 <a
+                    href="https://devchat.tv/elixir-mix/emx-063-designing-elixir-systems-with-otp-with-bruce-tate-and-james-gray/">Designing
+                    Elixir Systems With OTP</a> von Elixir-Mix von einem kleinen Hilfsprogramm gehört, mit
+                dem man beliebige Befehle ausführen lassen kann, sobald sich eine zu einem angegebenen Muster passende
+                Datei ändert: <a href="https://github.com/alexch/rerun">"rerun"</a>.
+                Allerdings ist es ein Ruby Gem, d.h. man benötigt Ruby, was ich auf meinem Linux-System erstmal
+                installieren musste, denn ich mache eigentlich nichts mit Ruby.
+            </p>
+            <p>Danach habe ich mir für meine jeweilige Elixir-Applikation ein kleines Shell-Skript "mix_test_watch.sh"
+                geschrieben, damit ich das Datei-Muster nicht jedesmal auf's Neue eintippen muss:
+                <pre><code>#!/bin/bash
+rerun --dir "lib" --pattern "**/*.ex" -- mix test</code></pre>
+
+            </p>
+            <p>Anschließend noch ein <code>chmod +x ./mix_test_watch.sh</code> und schon habe ich einen startbaren,
+                mitlaufenden Test-Watcher.</p>
+            <p>Alternativ gibt's als Test-Watcher für Elixir auch noch eine spezialisierte Mix-Erweiterung: <a
+                    href="https://hex.pm/packages/mix_test_watch">mix_test_watch</a>. "rerun" kann aber eben nicht nur
+                als Test-Watcher verwendet werden, sondern z.B. auch, um bei jeder Änderung einen Dialyizer
+                (Typ-Analyse-Tool für Erlang/Elixir) Durchlauf zu starten, oder aber in der Extremform mit Hilfe einer
+                anderen Mix-Erweiterung, <a
+                    href="https://github.com/karolsluszniak/ex_check#getting-started">ex_check</a>, gleich das volle
+                Paket (Formatter, Linting, Statische Code-Analyse, Tests, Type-Checker). Wobei dann jeder Durchlauf
+                signifikant Zeit braucht...</p>
+        </article>
         <article id="phoenix_in_apache_linux_setup">
             <h2>
                 Eine Elixir Phoenix App in Apache auf einem vServer hosten
@@ -998,7 +1028,7 @@ view model =
             </p>
         </article>
 
-        <!-- <article id ="">
+        <!-- <article id="">
             <h2>
 
             </h2>
