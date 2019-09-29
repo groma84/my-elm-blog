@@ -21,6 +21,24 @@
         <menu-component></menu-component>
     </header>
     <section id="main-content">
+        <article id="rerun_command_improved">
+            <h2>
+                Verbesserte Variante des rerun-Skripts
+            </h2>
+            <h3>von Martin Grotz, 2019-09-29</h3>
+            <p>Meine ersten Gehversuche mit dem rerun-Befehl waren schon ganz gut. Mittlerweile habe ich mein
+                Shell-Skript zum Starten davon noch ein bisschen verfeinert.</p>
+            <p>Während ich mit Elixir entwickle habe ich in einer Shell parallel jetzt eigentlich immer diesen Befehl
+                laufen:</p>
+            <pre><code>rerun --dir "lib" --dir test --pattern "**/*.{ex,exs}" --exit --clear --name "Tests" -- mix test</code></pre>
+            <p>Dadurch ist das Ergebnis in den Notifications besser zu erkennen und man findet beim Reinschauen dann
+                schneller, was genau das Problem ist.
+                <br>
+                Für die Typanalyse via Dialyizer nutze ich ebenfalls mittlerweile einen rerun-Befehl mit sehr ähnlichem
+                Muster:
+            </p>
+            <pre><code>rerun --dir "lib" --pattern "**/*.ex" --exit --clear --name "Dialyzer" -- mix dialyzer</code></pre>
+        </article>
         <article id="rerun_command">
             <h2>
                 "rerun" statt "mix test.watch"
