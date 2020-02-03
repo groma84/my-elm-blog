@@ -21,6 +21,58 @@
         <menu-component></menu-component>
     </header>
     <section id="main-content">
+        <article id="phoenix_liveview_hinter_apache">
+            <h2>
+                Phoenix LiveView in einer hinter einem Apache gehosteten Phoenix-Anwendung
+            </h2>
+            <h3>von Martin Grotz, 2020-02-03</h3>
+            <p>
+                Ich habe in eine bestehende Phoenix-Anwendung ein bisschen Client-Side-Dynamik reingebaut - mit <a
+                    href="https://github.com/phoenixframework/phoenix_live_view">Phoenix LiveView</a>.
+                <br />
+                Zuerst ging das nach dem Update auf meinem Server (ursprüngliche Anleitung siehe <a
+                    href="#phoenix_in_apache_linux_setup">mein
+                    vorheriger Blog-Post zum Thema</a>) nicht, da LiveView gar nicht erst initialisiert wurde.
+                Der Grund war ziemlich einfach: Ich habe vor dem Bauen des Releases vergessen, die Web-Assets neu zu
+                erzeugen.
+
+                Mit den folgenden zwei Zeilen macht man das - mittlerweile habe ich mir eine build_prod.sh geschrieben,
+                die alle Schritte nacheinander ausführt:
+                <pre><code class="bash">npm run deploy --prefix ./assets
+mix phx.digest</code></pre>
+
+                Das nächste Problem war, dass LiveView Probleme mit der Session-Info hatte.
+                Hier hat es geholfen, eine Anpassung im Projekt in der "endpoint.ex"-Datei zu machen:
+
+                Aus
+                <pre><code class="elixir">plug Plug.Session,
+    store: :cookie,
+    key: "_my_app_key",
+    signing_salt: "abc123"</code></pre>
+                wird
+                <pre><code class="elixir">plug Plug.Session, @session_options</code></pre>
+
+                Dann müssen natürlich die Optionen woanders definiert werden:
+                <pre><code class="elixir">@session_options [
+  store: :cookie,
+  key: "_my_app_key",
+  signing_salt: "abc123"
+]</code></pre>
+                Und dann noch für LiveView angegeben werden:
+                <pre><code class="elixir">socket "/live", Phoenix.LiveView.Socket, websocket: [connect_info: [session: @session_options]]</code></pre>
+
+
+                Damit hat es dann aber immer noch nicht funktioniert, denn es fehlte noch die Weiterleitung im Apache
+                vom LiveView-Websocket. Dafür musste ich auf dem Server selbst die Konfigurationsdatei anpassen,
+                also z.B. in "/etc/apache2/sites-available/041-my-site-ssl.conf".
+                Da müssen Einträge dazu:
+                <pre><code class="bash">ProxyPass /live/ ws://localhost:&lt;port_des_phoenix_servers&gt;/live/
+ProxyPassReverse /live/ ws://localhost:&lt;port_des_phoenix_servers&gt;/live/</code></pre>
+
+                Nach Aufspielen der Elixir-App-Version mit allen Änderungen und Neustart des Apache2 nach der
+                Konfigurationsänderung lief dann endlich alles wieder.
+            </p>
+        </article>
         <article id="elixir_artikel_informatik_aktuell">
             <h2>
                 Artikel zu Erlang und Elixir auf informatik-aktuell.de
