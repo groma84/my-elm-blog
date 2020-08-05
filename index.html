@@ -21,6 +21,37 @@
         <menu-component></menu-component>
     </header>
     <section id="main-content">
+        <article id="elm_br_in_paragraph">
+            <h2>
+                Line Breaks in einem Paragraph in Elm
+            </h2>
+            <h3>von Martin Grotz, 2020-08-05</h3>
+            <p>Neulich hatte ich für ein Impressum innerhalb einer einfachen Web-App die Problemstellung,
+                eine einfache mehrzeilige Adresse in einem Text-Paragraph abzubilden.
+            </p>
+            <p>
+                In reinem HTML ist das kein Problem, und auch in Elm geht das natürlich, artet aber bei mehreren Zeilen
+                schnell aus:
+            </p>
+            <pre><code class="elm">p 
+    [] 
+    [text "Erste Zeile"
+    , br [] []
+    , text "Zweite Zeile"
+    , br [] []
+    , text "Letzte Zeile"]</code></pre>
+
+            Kürzer, und auch besser mit programmatisch geliefertem Text kombinierbar geht es mit Listen-Funktionen:
+            <pre><code class="elm">p 
+    []
+    (["Erste Zeile", "Zweite Zeile", "Letzte Zeile"] 
+        |> List.map text
+        |> List.intersperse (br [] [])
+    )</code></pre>
+            Die Liste mit den einzelnen Teilen kann jetzt aus einer beliebigen Quelle stammen, und muss nicht mehr fest
+            kodiert sein. Sehr praktisch!
+        </article>
+
         <article id="mal_wieder_neue_ix_artikel">
             <h2>
                 Zwei neue Artikel für iX
