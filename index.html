@@ -21,6 +21,40 @@
         <menu-component></menu-component>
     </header>
     <section id="main-content">
+        <article id="elm-ui_bewertung">
+            <h2>
+                elm-ui
+            </h2>
+            <h3>von Martin Grotz, 2020-08-17</h3>
+            <p>In meinem letzten kleinen Elm-Projekt habe ich <a href="https://github.com/mdgriffith/elm-ui">elm-ui</a>
+                ausprobiert.</p>
+            <p>Die Grundidee bei elm-ui ist es, dass man sich nicht mehr mit nackten HTML-Elementen rumschlägt, sondern
+                semantische Funktionen benutzt, die intern das passende HTML mit passenden Basis-Styles erzeugen.
+                <br>
+                Statt also z.B. div in div in div zu schachteln und jeweils Flexbox-Klassen ranzupacken, hat man eine
+                "row"-Funktion, in die man eine "column"-Funktion packt,
+                in die dann zum Beispiel eine "input"-Funktion mit einem Konfigurations-Record eingefügt wird, bei der
+                placeholder, label und error-Text automatisch verwaltet werden.
+            </p>
+            <p>Für einen ersten Prototyp hat sich die Bibliothek als sehr praktisch erwischen: Ich hatte schnell
+                ansehnliche Ergebnisse, und vieles hat einfach so out-of-the-box funktioniert.
+                <br>
+                Allerdings bin ich dann im weiteren Verlauf doch an Grenzen gestoßen, und wie es oft so ist: Sobald man
+                die vorgegebenen Pfade der Bibliotheken verlässt, wird es unschön.
+                <br>
+                Am Ende habe ich den Motivationsboost vom ersten, ansehnlichen Prototypen mitgenommen und die View
+                umgebaut auf meinen aktuellen Lieblings-Weg:
+                <br>
+                Die Nutzung von <a href="tachyons.io/">Tachyons CSS</a> in Verbindung mit <a
+                    href="https://package.elm-lang.org/packages/groma84/elm-tachyons/latest">der zugehörigen
+                    Elm-Library</a>, um in Elm typsicher Tachyons-Klassen vergeben zu können.
+                Damit komme ich schnell zu guten Ergebnissen, behalte aber die volle Flexibilität.
+            </p>
+            <p>Als Nebeneffekt bin ich durch den Fork der inaktiven Original-Elm-Library für Tachyons jetzt auch stolzer
+                Maintainer
+                einer Elm-Bibliothek!</p>
+        </article>
+
         <article id="elm_br_in_paragraph">
             <h2>
                 Line Breaks in einem Paragraph in Elm
@@ -82,39 +116,39 @@
 
                 Mit den folgenden zwei Zeilen macht man das - mittlerweile habe ich mir eine build_prod.sh geschrieben,
                 die alle Schritte nacheinander ausführt:
-            <pre><code class="bash">npm run deploy --prefix ./assets
+                <pre><code class="bash">npm run deploy --prefix ./assets
 mix phx.digest</code></pre>
 
-            Das nächste Problem war, dass LiveView Probleme mit der Session-Info hatte.
-            Hier hat es geholfen, eine Anpassung im Projekt in der "endpoint.ex"-Datei zu machen:
+                Das nächste Problem war, dass LiveView Probleme mit der Session-Info hatte.
+                Hier hat es geholfen, eine Anpassung im Projekt in der "endpoint.ex"-Datei zu machen:
 
-            Aus
-            <pre><code class="elixir">plug Plug.Session,
+                Aus
+                <pre><code class="elixir">plug Plug.Session,
     store: :cookie,
     key: "_my_app_key",
     signing_salt: "abc123"</code></pre>
-            wird
-            <pre><code class="elixir">plug Plug.Session, @session_options</code></pre>
+                wird
+                <pre><code class="elixir">plug Plug.Session, @session_options</code></pre>
 
-            Dann müssen natürlich die Optionen woanders definiert werden:
-            <pre><code class="elixir">@session_options [
+                Dann müssen natürlich die Optionen woanders definiert werden:
+                <pre><code class="elixir">@session_options [
   store: :cookie,
   key: "_my_app_key",
   signing_salt: "abc123"
 ]</code></pre>
-            Und dann noch für LiveView angegeben werden:
-            <pre><code class="elixir">socket "/live", Phoenix.LiveView.Socket, websocket: [connect_info: [session: @session_options]]</code></pre>
+                Und dann noch für LiveView angegeben werden:
+                <pre><code class="elixir">socket "/live", Phoenix.LiveView.Socket, websocket: [connect_info: [session: @session_options]]</code></pre>
 
 
-            Damit hat es dann aber immer noch nicht funktioniert, denn es fehlte noch die Weiterleitung im Apache
-            vom LiveView-Websocket. Dafür musste ich auf dem Server selbst die Konfigurationsdatei anpassen,
-            also z.B. in "/etc/apache2/sites-available/041-my-site-ssl.conf".
-            Da müssen Einträge dazu:
-            <pre><code class="bash">ProxyPass /live/ ws://localhost:&lt;port_des_phoenix_servers&gt;/live/
+                Damit hat es dann aber immer noch nicht funktioniert, denn es fehlte noch die Weiterleitung im Apache
+                vom LiveView-Websocket. Dafür musste ich auf dem Server selbst die Konfigurationsdatei anpassen,
+                also z.B. in "/etc/apache2/sites-available/041-my-site-ssl.conf".
+                Da müssen Einträge dazu:
+                <pre><code class="bash">ProxyPass /live/ ws://localhost:&lt;port_des_phoenix_servers&gt;/live/
 ProxyPassReverse /live/ ws://localhost:&lt;port_des_phoenix_servers&gt;/live/</code></pre>
 
-            Nach Aufspielen der Elixir-App-Version mit allen Änderungen und Neustart des Apache2 nach der
-            Konfigurationsänderung lief dann endlich alles wieder.
+                Nach Aufspielen der Elixir-App-Version mit allen Änderungen und Neustart des Apache2 nach der
+                Konfigurationsänderung lief dann endlich alles wieder.
             </p>
         </article>
         <article id="elixir_artikel_informatik_aktuell">
@@ -162,7 +196,7 @@ ProxyPassReverse /live/ ws://localhost:&lt;port_des_phoenix_servers&gt;/live/</c
             </p>
             <p>Danach habe ich mir für meine jeweilige Elixir-Applikation ein kleines Shell-Skript "mix_test_watch.sh"
                 geschrieben, damit ich das Datei-Muster nicht jedesmal auf's Neue eintippen muss:
-            <pre><code>#!/bin/bash
+                <pre><code>#!/bin/bash
 rerun --dir "lib" --pattern "**/*.ex" -- mix test</code></pre>
 
             </p>
@@ -223,7 +257,7 @@ rerun --dir "lib" --pattern "**/*.ex" -- mix test</code></pre>
                 Für diese Weiterleitung brauchen wir noch zwei Erweiterungen (mods): mod_proxy_http und
                 mod_proxy_wstunnel.
                 Dann die erste Datei: "run_for_your_lives.conf" mit dem Inhalt:
-            <pre><code><VirtualHost run.finde-ich-super.de:80>
+                <pre><code><VirtualHost run.finde-ich-super.de:80>
                         ServerName run.finde-ich-super.de
                     
                         ServerAdmin martin.grotz@gmx.de
@@ -236,8 +270,8 @@ rerun --dir "lib" --pattern "**/*.ex" -- mix test</code></pre>
                         RewriteRule ^ https://%{SERVER_NAME}%{REQUEST_URI} [END,NE,R=permanent]
                     </VirtualHost></code></pre>
 
-            Und dann noch die mit den Weiterleitungen auf die Erlang-Application und dem eigentlichen Setup:
-            <pre><code><IfModule mod_ssl.c>
+                Und dann noch die mit den Weiterleitungen auf die Erlang-Application und dem eigentlichen Setup:
+                <pre><code><IfModule mod_ssl.c>
                         <VirtualHost run.finde-ich-super.de:443>
                             ServerAdmin martin.grotz@gmx.de
                             ServerName run.finde-ich-super.de
@@ -258,8 +292,8 @@ rerun --dir "lib" --pattern "**/*.ex" -- mix test</code></pre>
                         </VirtualHost>
                     </IfModule></code></pre>
 
-            Danach den Symlink setzen, damit in "sites-enabled" auch die passende Konfigurationsdatei aus
-            "sites-available" eingebunden ist.
+                Danach den Symlink setzen, damit in "sites-enabled" auch die passende Konfigurationsdatei aus
+                "sites-available" eingebunden ist.
             </p>
             <p>Jetzt noch einen Apache-Restart und dann mit "certbot" das Zertifikat um die neue Subdomain erweitern.
             </p>
@@ -268,7 +302,7 @@ rerun --dir "lib" --pattern "**/*.ex" -- mix test</code></pre>
                 starten, sonst laufen die Apache-Requests ins Leere.
                 Dazu muss eine Datei angelegt werden: "/lib/systemd/system/run_for_your_lives_phoenix.service", mit
                 ungefähr nachfolgendem Inhalt:
-            <pre><code>
+                <pre><code>
                     [Unit]
                         Description=Run For Your Lives Phoenix App
                         After=network.target
@@ -292,10 +326,10 @@ rerun --dir "lib" --pattern "**/*.ex" -- mix test</code></pre>
                         [Install]
                         WantedBy=multi-user.target
                 </code></pre>
-            Die müssen wir dann noch beim System bekannt machen: "systemctl enable
-            run_for_your_lives_phoenix.service". Anleitung übrigens <a
-                href="https://elixirforum.com/t/elixir-apps-as-systemd-services-info-wiki/2400">aus dem Elixir
-                Forum</a>
+                Die müssen wir dann noch beim System bekannt machen: "systemctl enable
+                run_for_your_lives_phoenix.service". Anleitung übrigens <a
+                    href="https://elixirforum.com/t/elixir-apps-as-systemd-services-info-wiki/2400">aus dem Elixir
+                    Forum</a>
             </p>
 
         </article>
@@ -487,7 +521,7 @@ rerun --dir "lib" --pattern "**/*.ex" -- mix test</code></pre>
                 Wir haben sechs verschiedene Würfel, und wir brauchen für den Zufallsgenerator dann jeweils noch einen
                 "Seed"-Wert.
                 Also sieht das gesamte Modell so aus:
-            <pre><code>type alias Model =
+                <pre><code>type alias Model =
     { whiteDieOne : Int
     , whiteDieTwo : Int
     , blueDie : Int
@@ -496,31 +530,31 @@ rerun --dir "lib" --pattern "**/*.ex" -- mix test</code></pre>
     , yellowDie : Int
     , nextSeed : Seed
     }</code></pre>
-            Der Einfachheit halber ist die Augenzahl hier einfach eine Ganzzahl. Schöner wäre es natürlich, hier
-            einen Union Type zu nehmen, der alle sechs gültigen Werte total abdeckt.
-            Für ein so kleines Programm wie dieses hier habe ich mir das aber erstmal gespart - vielleicht
-            refactore ich es ja irgendwann mal als weitere Übung.
+                Der Einfachheit halber ist die Augenzahl hier einfach eine Ganzzahl. Schöner wäre es natürlich, hier
+                einen Union Type zu nehmen, der alle sechs gültigen Werte total abdeckt.
+                Für ein so kleines Programm wie dieses hier habe ich mir das aber erstmal gespart - vielleicht
+                refactore ich es ja irgendwann mal als weitere Übung.
             </p>
 
             <p>
                 An Interaktionen bietet die App nur das Neu-Würfeln aller Würfel ("RollDice") - und wir brauchen einen
                 Nachrichtentyp, um
                 einen Vorgang mit Seiteneffekt abzubilden ("InitialTimeUpdated"):
-            <pre><code>type Msg
+                <pre><code>type Msg
     = RollDice
     | InitialTimeUpdated Posix</code></pre>
-            "Posix" ist hierbei das neue Zeitformat in Elm 0.19.
+                "Posix" ist hierbei das neue Zeitformat in Elm 0.19.
             </p>
 
             <p>
                 Die "InitialTimeUpdated"-Nachricht wird eingangs von folgender Funktion zur Auslösung vorgesehen:
-            <pre><code>createInitialTimeCommand : Cmd Msg
+                <pre><code>createInitialTimeCommand : Cmd Msg
 createInitialTimeCommand =
     now |> Task.perform InitialTimeUpdated</code></pre>
-            "now" ist eine fertige Funktion aus der Time-Bibliothek von Elm, welche einen Task zurück gibt.
-            Da dieser Task per Elm-Definition niemals fehlschlagen kann, können wir ihn einfach mit "Task.perform"
-            ausführen und nach erfolgter Ausführung die "InitialTimeUpdated"-Nachricht mit dem ermittelten
-            Zeitstempel absetzen.
+                "now" ist eine fertige Funktion aus der Time-Bibliothek von Elm, welche einen Task zurück gibt.
+                Da dieser Task per Elm-Definition niemals fehlschlagen kann, können wir ihn einfach mit "Task.perform"
+                ausführen und nach erfolgter Ausführung die "InitialTimeUpdated"-Nachricht mit dem ermittelten
+                Zeitstempel absetzen.
             </p>
 
             <p>Die Funktion führen wir dann gleich im init aus, damit wir zu Beginn des Programms direkt den
@@ -532,7 +566,7 @@ createInitialTimeCommand =
                 Setzt man hier immer den gleichen Seed, bekommt man immer die gleiche Abfolge von Zufallszahlen (bzw.
                 eigentlich eben Pseudozufallszahlen).
 
-            <pre><code>init : ( Model, Cmd Msg )
+                <pre><code>init : ( Model, Cmd Msg )
 init =
     ( { whiteDieOne = 1
         , whiteDieTwo = 1
@@ -548,7 +582,7 @@ init =
 
             <p>
                 Die beiden Wege in der update-Funktion machen eigentlich das gleiche, nur eben mit anderen Inputs:
-            <pre><code>update : Msg -> Model -> ( Model, Cmd Msg )
+                <pre><code>update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         RollDice ->
@@ -557,9 +591,9 @@ update msg model =
         InitialTimeUpdated time ->
             ( time |> posixToMillis |> initialSeed |> rollAndUpdateModel model, Cmd.none )</code></pre>
 
-            Im RollDice-Fall haben wir alle Informationen schon in unserem model, im InitialTimeUpdated-Fall müssen
-            wir aus der ermittelten Zeit erst noch einen initialen Seed-Wert für den Pseudozufallszahlengenerator
-            erzeugen und mit übergeben.
+                Im RollDice-Fall haben wir alle Informationen schon in unserem model, im InitialTimeUpdated-Fall müssen
+                wir aus der ermittelten Zeit erst noch einen initialen Seed-Wert für den Pseudozufallszahlengenerator
+                erzeugen und mit übergeben.
             </p>
 
             <p>
@@ -568,7 +602,7 @@ update msg model =
                 Einerseits erzeugen wir den nächsten Eingabe-Wert für den Zahlengenerator, andererseits die nächsten
                 sechs Zufallszahlen, die wir dann auf die einzelnen Würfel verteilen.
                 Hierzu nutzen wir Pattern-Matching auf die Liste der Zahlen.
-            <pre><code>rollAndUpdateModel : Model -> Seed -> Model
+                <pre><code>rollAndUpdateModel : Model -> Seed -> Model
 rollAndUpdateModel model seed =
     let
         ( newNumbers, nextSeed ) =
@@ -626,7 +660,7 @@ mapRandomsToDice model newNumbers =
                 Und dann wird das alles für jeden einzelnen Würfel und jede Würfelsumme definiert und einmal mit einem
                 List.map durchgenudelt:
 
-            <pre><code>getDiceSumAsText : Int -> Int -> Html never
+                <pre><code>getDiceSumAsText : Int -> Int -> Html never
 getDiceSumAsText first second =
     first + second |> String.fromInt |> text
 
@@ -748,39 +782,39 @@ view model =
                 haben, dass Elm seine
                 "keine Laufzeitfehler"-Garantie wirklich leben kann: Maybe und Result.
                 <br>
-            <pre><code>type Maybe a
+                <pre><code>type Maybe a
     = Just a
     | Nothing</code></pre> Mit Maybe lässt sich der Fall ausdrücken, dass es einen Wert gibt - oder eben nicht. Mein
-            bisher häufigster
-            Anwendungsfall dafür sind optionale Eingabefelder. Ist kein Wert drin, haben wir eben Nothing. Und
-            sobald
-            was eingegeben wurde, ist Just a drin. Sonst benutzt man es auch für Funktionsparameter, die nicht
-            unbedingt
-            gesetzt sein müssen.
-            <br> Elm kommt also zur Darstellung von "hier könnte was sein oder auch nicht" ohne Magic Values und
-            auch ohne
-            das gemeine NULL aus, das schon für so viel Kummer gesorgt hat.
-            <br> Hat man nun aber einen Vorgang, der auch fehlschlagen kann, und man möchte auch die Information
-            behalten,
-            was genau schief gegangen ist, so gibt es dafür den Result-Datentyp:
-            <pre><code>type Result error value
+                bisher häufigster
+                Anwendungsfall dafür sind optionale Eingabefelder. Ist kein Wert drin, haben wir eben Nothing. Und
+                sobald
+                was eingegeben wurde, ist Just a drin. Sonst benutzt man es auch für Funktionsparameter, die nicht
+                unbedingt
+                gesetzt sein müssen.
+                <br> Elm kommt also zur Darstellung von "hier könnte was sein oder auch nicht" ohne Magic Values und
+                auch ohne
+                das gemeine NULL aus, das schon für so viel Kummer gesorgt hat.
+                <br> Hat man nun aber einen Vorgang, der auch fehlschlagen kann, und man möchte auch die Information
+                behalten,
+                was genau schief gegangen ist, so gibt es dafür den Result-Datentyp:
+                <pre><code>type Result error value
     = Ok value
     | Err error</code></pre> Hat alles geklappt, so steckt das Ergebnis im Ok. Gab es aber einen Fehler, so steckt
-            dieser im Err-Fall.
-            <br> Sowohl Maybe als auch Result sind im Endeffekt nur clever definierte Union Types. Und weil jeder
-            Fehlerfall
-            entweder über ein Maybe oder Result ausgedrückt wird, und wir bei Union Types verpflichtend alle
-            definierten
-            Fälle behandeln müssen, müssen wir uns für jede Stelle in unserem Programm überlegen, wie wir mit dem
-            jeweiligen
-            Fehlerfall genau umgehen. Dadurch können keine Fälle vergessen werden und es gibt keine unerwarteten
-            Überraschungen
-            zur Laufzeit.
-            <br> Bei unserem ersten Projekt, einem kleinen Spiel, werden uns Maybe und Result allerdings eher
-            selten begegnen,
-            da dieses ohne Server oder komplizierte Daten-Konvertierungen auskommt. Hier haben wir fast alles
-            selbst
-            in der Hand und bewegen uns nur in der geschützten Elm-Welt.
+                dieser im Err-Fall.
+                <br> Sowohl Maybe als auch Result sind im Endeffekt nur clever definierte Union Types. Und weil jeder
+                Fehlerfall
+                entweder über ein Maybe oder Result ausgedrückt wird, und wir bei Union Types verpflichtend alle
+                definierten
+                Fälle behandeln müssen, müssen wir uns für jede Stelle in unserem Programm überlegen, wie wir mit dem
+                jeweiligen
+                Fehlerfall genau umgehen. Dadurch können keine Fälle vergessen werden und es gibt keine unerwarteten
+                Überraschungen
+                zur Laufzeit.
+                <br> Bei unserem ersten Projekt, einem kleinen Spiel, werden uns Maybe und Result allerdings eher
+                selten begegnen,
+                da dieses ohne Server oder komplizierte Daten-Konvertierungen auskommt. Hier haben wir fast alles
+                selbst
+                in der Hand und bewegen uns nur in der geschützten Elm-Welt.
             </p>
         </article>
         <article>
@@ -964,25 +998,25 @@ quadrierteListe =
                 überhaupt gibt und was wir damit jeweils machen können. Im ersten Teil der dreiteiligen Artikel-Reihe
                 geht
                 es um die grundlegenden Typen:
-            <section>
-                <h4>
-                    Primitive Typen
-                </h4>
-                Es gibt in Elm eine Reihe von grundlegenden Typen, die dann zu anderen Typen zusammengesetzt
-                werden. Im Detail sind das:
-                <ul>
-                    <li>Char: Einzelnes Zeichen</li>
-                    <li>String: Zeichenketten</li>
+                <section>
+                    <h4>
+                        Primitive Typen
+                    </h4>
+                    Es gibt in Elm eine Reihe von grundlegenden Typen, die dann zu anderen Typen zusammengesetzt
+                    werden. Im Detail sind das:
+                    <ul>
+                        <li>Char: Einzelnes Zeichen</li>
+                        <li>String: Zeichenketten</li>
 
-                    <li>Bool: True oder False, um einen Wert darzustellen, der entweder Wahr oder Unwahr sein kann
-                    </li>
-                    <li>Int: Ganze Zahl</li>
-                    <li>Float: Kommazahl</li>
-                    <li>number: Kann entweder Int oder Float sein - je nach tatsächlicher Verwendung</li>
-                </ul>
+                        <li>Bool: True oder False, um einen Wert darzustellen, der entweder Wahr oder Unwahr sein kann
+                        </li>
+                        <li>Int: Ganze Zahl</li>
+                        <li>Float: Kommazahl</li>
+                        <li>number: Kann entweder Int oder Float sein - je nach tatsächlicher Verwendung</li>
+                    </ul>
 
-                Als Elm-Code sieht das dann jeweils so aus:
-                <pre><code>c : Char
+                    Als Elm-Code sieht das dann jeweils so aus:
+                    <pre><code>c : Char
 c =
     'a'
 
@@ -1009,21 +1043,21 @@ n1 =
 n2 : number
 n2 =
     3.1415</code></pre>
-            </section>
+                </section>
 
-            <section>
-                <h4>Records</h4>
-                <p>Records sind unveränderliche Datenstrukturen, die aus mehreren Werten zusammengesetzt sind. Sie
-                    werden
-                    in Elm für gewöhnlich als Type-Alias definiert - theoretisch kann man aber auch direkt einen
-                    Record
-                    an Ort und Stelle definieren, ohne vorher einen passenden Type-Alias angelegt zu haben.
-                </p>
-                <p>Wichtig: Records in Elm werden über ihren Inhalt verglichen - nicht über ihre Referenz.
-                    Außerdem: Records
-                    in Elm erfüllen dann eine Funktions-Signatur, wenn sie strukturell passen.</p>
-                <p>In Elm-Code sieht das dann so aus:</p>
-                <pre><code>-- Record
+                <section>
+                    <h4>Records</h4>
+                    <p>Records sind unveränderliche Datenstrukturen, die aus mehreren Werten zusammengesetzt sind. Sie
+                        werden
+                        in Elm für gewöhnlich als Type-Alias definiert - theoretisch kann man aber auch direkt einen
+                        Record
+                        an Ort und Stelle definieren, ohne vorher einen passenden Type-Alias angelegt zu haben.
+                    </p>
+                    <p>Wichtig: Records in Elm werden über ihren Inhalt verglichen - nicht über ihre Referenz.
+                        Außerdem: Records
+                        in Elm erfüllen dann eine Funktions-Signatur, wenn sie strukturell passen.</p>
+                    <p>In Elm-Code sieht das dann so aus:</p>
+                    <pre><code>-- Record
 somePoint =
     { x = 3, y = -1 }
 
@@ -1048,9 +1082,9 @@ someFunc p1 p2 =
 x =
     someFunc somePoint anotherPoint</code></pre>
 
-                <p>Noch mehr Infos zu Records gibt es
-                    <a href="http://elm-lang.org/docs/records">in der offiziellen Elm-Doku</a>.</p>
-            </section>
+                    <p>Noch mehr Infos zu Records gibt es
+                        <a href="http://elm-lang.org/docs/records">in der offiziellen Elm-Doku</a>.</p>
+                </section>
             </p>
 
             <p>Im nächsten Teil der Serie geht es dann um Union Types und Listen.</p>
@@ -1123,10 +1157,10 @@ x =
                 In
                 <code class="inline">Main.elm</code> - dem Einsprungpunkt jedes Elm-Programms - vereinfachen wir die
                 <code class="inline">view</code>-Funktion derart, dass sie folgendermaßen aussieht:
-            <pre><code>view : Model -> Html Msg
+                <pre><code>view : Model -> Html Msg
 view model =
     div [] []</code></pre> Dadurch wird nurmehr eine Seite mit einem leeren
-            <code class="inline">div</code> erzeugt.
+                <code class="inline">div</code> erzeugt.
             </p>
 
             <p>Damit ist die Leinwand vorbereitet, um jetzt mit dem nächsten Schritt weitermachen zu können: Die
