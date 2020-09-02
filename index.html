@@ -21,7 +21,6 @@
         <menu-component></menu-component>
     </header>
     <section id="main-content">
-
         <article id="fsharp_workshop_applicative_functor">
             <h2>
                 F#: Unser Workshop, der Applicative Functor und das Live Coding - Teil 1
@@ -119,6 +118,39 @@ let validate id vorname spitzname geburtsdatum =
             </p>
             <p>Aber wie sähen alternative Lösungen aus, wenn wir doch alle Fehler sammeln wollten? Da dieser Eintrag
                 recht lang geworden ist, gibt's dafür demnächst einen Extra-Blogpost!</p>
+        </article>
+        <article id="elm-ui_bewertung">
+            <h2>
+                elm-ui
+            </h2>
+            <h3>von Martin Grotz, 2020-08-17</h3>
+            <p>In meinem letzten kleinen Elm-Projekt habe ich <a href="https://github.com/mdgriffith/elm-ui">elm-ui</a>
+                ausprobiert.</p>
+            <p>Die Grundidee bei elm-ui ist es, dass man sich nicht mehr mit nackten HTML-Elementen rumschlägt, sondern
+                semantische Funktionen benutzt, die intern das passende HTML mit passenden Basis-Styles erzeugen.
+                <br>
+                Statt also z.B. div in div in div zu schachteln und jeweils Flexbox-Klassen ranzupacken, hat man eine
+                "row"-Funktion, in die man eine "column"-Funktion packt,
+                in die dann zum Beispiel eine "input"-Funktion mit einem Konfigurations-Record eingefügt wird, bei der
+                placeholder, label und error-Text automatisch verwaltet werden.
+            </p>
+            <p>Für einen ersten Prototyp hat sich die Bibliothek als sehr praktisch erwischen: Ich hatte schnell
+                ansehnliche Ergebnisse, und vieles hat einfach so out-of-the-box funktioniert.
+                <br>
+                Allerdings bin ich dann im weiteren Verlauf doch an Grenzen gestoßen, und wie es oft so ist: Sobald man
+                die vorgegebenen Pfade der Bibliotheken verlässt, wird es unschön.
+                <br>
+                Am Ende habe ich den Motivationsboost vom ersten, ansehnlichen Prototypen mitgenommen und die View
+                umgebaut auf meinen aktuellen Lieblings-Weg:
+                <br>
+                Die Nutzung von <a href="tachyons.io/">Tachyons CSS</a> in Verbindung mit <a
+                    href="https://package.elm-lang.org/packages/groma84/elm-tachyons/latest">der zugehörigen
+                    Elm-Library</a>, um in Elm typsicher Tachyons-Klassen vergeben zu können.
+                Damit komme ich schnell zu guten Ergebnissen, behalte aber die volle Flexibilität.
+            </p>
+            <p>Als Nebeneffekt bin ich durch den Fork der inaktiven Original-Elm-Library für Tachyons jetzt auch stolzer
+                Maintainer
+                einer Elm-Bibliothek!</p>
         </article>
 
         <article id="elm_br_in_paragraph">
