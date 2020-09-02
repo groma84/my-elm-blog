@@ -6,7 +6,7 @@
     <meta name="description"
         content="Ein Blog zur funktionalen Frontend-Programmiersprache Elm und zur funktionalen Programmiersprache Elixir">
     <meta name="keywords"
-        content="elm, elixir, erlang, OTP, functional, programming, funktional, funktionale programmierung, spa, web, frontend">
+        content="elm, elixir, erlang, OTP, fsharp, f#, functional, programming, funktional, funktionale programmierung, spa, web, frontend">
     <meta name="referrer" content="origin">
     <link rel="stylesheet" href="main.css">
     <link rel="stylesheet" href="./highlightjs-styles/sunburst.css">
@@ -21,6 +21,106 @@
         <menu-component></menu-component>
     </header>
     <section id="main-content">
+
+        <article id="fsharp_workshop_applicative_functor">
+            <h2>
+                F#: Unser Workshop, der Applicative Functor und das Live Coding - Teil 1
+            </h2>
+            <h3>von Martin Grotz, 2020-09-02</h3>
+            <p>Am Montag war endlich wieder Workshop-Zeit: Der Workshop "Von C# zu F# - Einführung in die Funktionale
+                Programmierung" bei den <a href="https://md-devdays.de/Act?id=1000229">Magdeburger DevDays</a>.
+                Und wie jedes Mal, wenn mein Kollege <a href="https://draptik.github.io/">Patrick</a> und ich den
+                Workshop machen, haben wir uns den Applicative
+                Functor bis ganz zum Schluss aufgehoben. Denn um dessen Anwendung zu verstehen, braucht man all das, was
+                wir vorher im Workshop vermittelt haben: Currying/Partial Application, Typen als
+                Container/Kontext, das Komponieren von Funktionen als tolle Sache.
+            </p>
+            <p>Die Idee beim Applicative Functor mit seiner "apply"-Funktion ist, dass man nicht wie bei der
+                "map"-Funktion des Functors auf genau
+                einen Parameter beschränkt ist,
+                sondern mit beliebig vielen in einen Container-bzw. Kontext-Datentyp eingepackten Werten arbeiten kann,
+                da sich der Aufruf beliebig verketten lässt. Perfekt zum Beispiel für eine Erzeugung von irgendwas erst
+                dann, wenn alle Eingaben erfolgreich validiert wurden.
+                <br>
+
+                <img src="./Applicative_1_small.png" alt="Applicative Functor - Bildliche Erklärung">
+
+            </p>
+            <p>Und wie jedes Mal sind wir am Live Coding des Applicative Functors gescheitert.
+                <br>
+                Als wir es das allererste Mal in C# mit der <a
+                    href="https://github.com/la-yumba/functional-csharp-code">LaYumba-Bibliothek</a> versucht haben,
+                hatte unser Beispiel fünf
+                eingepackte Argumente - LaYumba konnte aber nur vier...
+                <br>Beim zweiten Mal Workshop-Halten hatten wir beim Smart Constructor, den wir mit den validierten
+                Werten aufrufen wollten, einen falschen Parameter-Typ angegeben, und beim Live Coden sieht man sowas
+                manchmal einfach nicht...
+                <br>
+                Natürlich konnten wir das jetzt beim dritten Mal auch nicht auf uns sitzen lassen und haben uns im Zug
+                auf der Heimfahrt auf
+                Fehlersuche begeben.
+            </p>
+            <p>Diesmal wollten wir uns das Leben leicht machen und haben F# statt C# verwendet, und direkt noch
+                die Bibliothek <a href="https://fsprojects.github.io/FSharpPlus">FSharpPlus</a> eingebunden.
+                <br>
+                Nur leider hatten die vorher ausgedachten Anforderungen einen Haken: Bei einem Eingabeparameter sollten
+                zwei Regeln angewendet werden, und beide Fehler gesammelt werden, und mit allen anderen Fehlern aus
+                anderen Felder zusammengepackt werden. Genau für sowas gibt es in FSharpPlus.Data den <a
+                    href="https://fsprojects.github.io/FSharpPlus/reference/fsharpplus-data-validation-2.html">Validation-Typ</a>
+                -
+                dachten wir zumindest...
+            </p>
+            <p>Doch der Fall, einen Wert mit mehreren Validatoren zu prüfen und alle dessen Fehler zu sammeln, ist dort
+                nicht vorgesehen. Mit Bordmitteln kann man bestenfalls den ersten Fehler jedes Felds sammeln - besser
+                als nichts, immerhin. Aber wir wollten halt das volle Programm, und sind daran dann in der kurzen Zeit
+                gescheitert.
+                <br>
+                Mit der genannten Einschränkung liest sich der F#-Code noch recht elegant:
+            <pre><code class="fsharp">// createKundeValidated :: int -> string -> string option -> DateTime -> Kunde
+let createKundeValidated id vorname spitzname geburtsdatum : Kunde =
+    {
+            Id = id
+            Vorname = vorname
+            Spitzname = spitzname
+            Geburtsdatum = geburtsdatum
+        }
+    
+// validate :: int -> string -> string option -> DateTime -> Validation&lt;string,Kunde>
+let validate id vorname spitzname geburtsdatum =
+    let notEmpty s =
+        if String.IsNullOrWhiteSpace s then
+            Failure "Darf nicht leer sein"
+        else
+            Success s
+    
+    let notTooLong s =
+        if String.length s > 30 then
+            Failure "Darf nicht zu lang sein"
+        else
+            Success s
+            
+    let notInTheFuture dt =
+        if dt > DateTime.Now then
+            Failure "Darf nicht in der Zukunft liegen"
+        else
+            Success dt
+    
+    let validateVorname v =
+        v
+        |> notEmpty
+        |> Validation.bind notTooLong
+    
+    // das erste "map" (als Infix-Operator) packt die partially applied function ein, 
+    // die nachfolgenden "apply"-Aufrufe (wieder Infix) füllen im Erfolgsfall jeweils ein Argument weiter aus
+    (createKundeValidated id)
+    &lt;!> (validateVorname vorname)
+    &lt;*> (Success spitzname)
+    &lt;*> (notInTheFuture geburtsdatum)</code></pre>
+            </p>
+            <p>Aber wie sähen alternative Lösungen aus, wenn wir doch alle Fehler sammeln wollten? Da dieser Eintrag
+                recht lang geworden ist, gibt's dafür demnächst einen Extra-Blogpost!</p>
+        </article>
+
         <article id="elm_br_in_paragraph">
             <h2>
                 Line Breaks in einem Paragraph in Elm
