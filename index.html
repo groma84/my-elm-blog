@@ -21,6 +21,93 @@
         <menu-component></menu-component>
     </header>
     <section id="main-content">
+        <article id="fsharp_workshop_applicative_functor_2">
+            <h2>
+                F#: Unser Workshop, der Applicative Functor und das Live Coding - Teil 2
+            </h2>
+            <h3>von Martin Grotz, 2020-09-07</h3>
+            <p>Eigentlich wollte ich drei verschiedene Wege erarbeiten, um ein Feld mit mehreren Validierungen zu
+                prüfen, woran wir im Workshop gescheitert werden. Daraus sind dann doch nur zwei geworden, weil sich aus
+                dem zweiten heraus organisch eine
+                Variante ergeben hat, die mir recht gut gefällt.</p>
+            <p>Variante 1 ist ganz primitiv: In einer Wrapper-Funktion werden die zu prüfenden Argumente einfach
+                mehrmals angegeben, und alle bis auf eins ignoriert. Aufgerufen wird die Funktion dann trotzdem nur,
+                wenn alle Validierungen gültig sind.
+                <br>
+                Für ganz einfache Funktionen wie hier im Beispiel ist das finde ich ein durchaus gangbarer Weg.
+                Allerdings muss die Wrapper-Funktion dann für jede neue Validierungsregel auch erweitert werden.
+                Außerdem habe ich neue Namen für die Argumente der Wrapper-Funktion gebraucht, da sind mir die Ideen
+                ausgegangen:
+            </p>
+            <pre><code class="fsharp">type Vorname = string
+// int -> string -> string option -> DateTime -> Validation<string, Kunde>
+let withDoubleParameters id vorname spitzname geburtsdatum =
+    // Vorname verdoppelt im Wrapper, aber das zweite Argument wird ignoriert
+    let createKundeWrapper i (v: Vorname) (_v: Vorname) s g = createKundeValidated i v s g
+
+    createKundeWrapper id
+    &lt;!> startsWithA vorname
+    <*> endsWithZ vorname
+    <*> (Success spitzname)
+    <*> notInTheFuture geburtsdatum</code></pre>
+
+            <p>Besser gefällt mir die zweite Variante, die von einer Funktion des Validation-Datentyps aus <a
+                    href="https://fsprojects.github.io/FSharpPlus">FSharpPlus</a>
+                Gebrauch macht: "appValidation" - mit folgender Beschreibung:
+            <blockquote>Takes two Validations and returns the first Success. If both are Failures it returns both
+                Failures combined with the supplied function.</blockquote>
+            Damit garantiert kein Success dabei ist, filtern wir die vorher alle raus.
+            <br>
+            Der Error-Typ der validate Funktion gefällt mir nicht so gut, aber ich habe es nicht hingekriegt, den
+            Typparameter so zu definieren, dass es einfach nur "muss die ++ Funktion implementieren" haben muss. Der
+            Fehler-Typ muss ein Monoid sein, deshalb habe ich da die Liste erzwungen - dann ist das auf jeden Fall
+            erfüllt.
+            <br>
+            Dafür gibt es glaube ich eigentlich die <a
+                href="https://docs.microsoft.com/en-us/dotnet/fsharp/language-reference/generics/statically-resolved-type-parameters">Statically
+                Resolved Type Parameters</a>, wollte bei mir aber nicht so...
+            </p>
+            <p>Insgesamt bin ich aber zufrieden, denn die Funktion kann beliebig viele Validatoren anwenden und eine
+                akkumulierte Liste von Fehlern ausspucken:</p>
+            <pre><code class="fsharp">let validate (validators: ('a -> Validation<'err list, 'a>) list) (input: 'a): Validation<'err list, 'a> =
+    let errors =
+        validators
+        |> map (fun fn -> fn input)
+        |> List.filter (function
+            | Success _ -> false
+            | Failure _ -> true)
+
+    match errors with
+    | [] -> Success input
+    | failedValidations -> List.reduce (Validation.appValidation (++)) failedValidations
+
+type FancyError =
+    | NotStartWithA
+    | NotEndWithZ
+    | IsInFuture
+
+let startsWithA' s =
+    if String.startsWith "a" s then Success s else Failure [ NotStartWithA ]
+
+let endsWithZ' s =
+    if String.endsWith "z" s then Success s else Failure [ NotEndWithZ ]
+
+let notInTheFuture' dt =
+    if dt > DateTime.Now then Failure [ IsInFuture ] else Success dt
+
+let niceErrorTypes id vorname spitzname geburtsdatum =
+    createKundeValidated id
+    &lt;!> validate [ startsWithA'; endsWithZ' ] vorname
+    <*> Success spitzname
+    <*> validate [ notInTheFuture' ] geburtsdatum
+</code></pre>
+
+            <p>Bin froh, dass ich da eine Lösung für mich gefunden habe, da das Problem in jedem ernstzunehmenden
+                Projekt vorkommen wird, bei dem Eingaben validiert werden. Auf github gibt's <a
+                    href="https://github.com/redheads/2020-08-magdeburger-devdays-fp-intro-csharp-fsharp/blob/ac01dfad231fff5a092da5f4162d62252511e549/code/FSharpRefactor/Grusskarten.fs">meinen
+                    Rumprobier-Code</a> auch.</p>
+        </article>
+
         <article id="fsharp_workshop_applicative_functor">
             <h2>
                 F#: Unser Workshop, der Applicative Functor und das Live Coding - Teil 1
