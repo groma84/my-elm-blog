@@ -21,6 +21,49 @@
         <menu-component></menu-component>
     </header>
     <section id="main-content">
+        <article id="vortrag_codedays_2021">
+            <h2>Vortrag zu Angular auf den CodeDays Digital</h2>
+            <h3>von Martin Grotz, 2021-02-09</h3>
+            <p>Heute habe ich meinen ersten Vortrag via Zoom gehalten - sonst bin ich nur als Teilnehmer dabei.</p>
+            <p>Dabei ging es um Content Projection in Angular. Beispiel-Code&Co. 
+                finden sich auf meinem github-Account, der Vortrag
+                selbst ist auch <a href="https://groma84.github.io/angular-content-projection-vortrag/">via github-pages abrufbar</a>.
+            </p>
+            <p>Lief ganz gut, auch wenn ich am Anfang den falschen Screen geshared habe (die Presenter-Ansicht), bis mich ein Teilnehmer im Chat drauf aufmerksam gemacht hat.
+                Und das Überbrücken der paar Minuten vor Vortragsbeginn und am Ende das Warten auf Fragen fällt mir via Zoom noch schwieriger als in einem echten Raum...
+            </p>
+
+            <p>Demnächst wird es auch mal wieder einen neuen Eintrag hier geben. Im Moment beschäftige ich mich mit der Raspberry Pi Programmierung mit Elixir Nerves. Spannend, aber da ich mich damit absolut gar nicht auskenne auch etwas mühsam.</p>
+        </article>
+        <!--
+        <article id="elixir_nerves_rpi4_temperatursensor">
+            <h2>
+Installation gemäß https://hexdocs.pm/nerves/installation.html#content
+
+Projekt anlegen: mix nerves.new hello_nerves
+
+Im Projektordner: MIX_TARGET=rpi4 mix deps.get
+
+VintageNet konfigurieren, siehe https://hexdocs.pm/vintage_net/cookbook.html
+
+Image bauen: MIX_TARGET=rpi4 mix firmware
+
+Bei mir in Linux Mint 20: mix firmware.burn -d /dev/mmcblk0
+
+Updaten später bei via WLAN verbundenem RPi: 
+
+Skript von https://github.com/nerves-project/ssh_subsystem_fwup/blob/main/priv/templates/script.upload.eex
+
+#!/bin/bash
+export MIX_TARGET=rpi4 && mix firmware && ./upload.sh
+
+Anleitung für Verkabelung von https://tutorials-raspberrypi.de/raspberry-pi-luftfeuchtigkeit-temperatur-messen-dht11-dht22/ und die Elixir Library von https://visciang.github.io/nerves_dht/readme.html#content
+
+            </h2>
+            <h3></h3>
+            <p></p>
+        </article>
+-->
         <article id="fsharp_workshop_applicative_functor_2">
             <h2>
                 F#: Unser Workshop, der Applicative Functor und das Live Coding - Teil 2
