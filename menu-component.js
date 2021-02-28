@@ -16,8 +16,17 @@ const MenuComponent = {
     <div class="menu">
         <nav>
             <ul>
-                <li class="${getActivePage('index') && 'active'}">
-                    <a href="index.html">Blog</a>
+                <li class="${getActivePage('2021') && 'active'}">
+                    <a href="2021.html">Blog</a>
+                </li>
+                <li class="${getActivePage('2020') && 'active'}">
+                    <a href="2020.html">2020</a>
+                </li>
+                <li class="${getActivePage('2019') && 'active'}">
+                    <a href="2019.html">2019</a>
+                </li>
+                <li class="${getActivePage('2018') && 'active'}">
+                    <a href="2018.html">2018</a>
                 </li>
                 <li class="${getActivePage('events') && 'active'}">
                     <a href="events.html">Events & Termine</a>

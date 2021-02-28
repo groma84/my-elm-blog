@@ -1,0 +1,386 @@
+<!doctype html>
+<html lang="de">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="description"
+        content="Ein Blog zur funktionalen Frontend-Programmiersprache Elm und zur funktionalen Programmiersprache Elixir">
+    <meta name="keywords"
+        content="elm, elixir, erlang, OTP, fsharp, f#, functional, programming, funktional, funktionale programmierung, spa, web, frontend">
+    <meta name="referrer" content="origin">
+    <link rel="stylesheet" href="main.css">
+    <link rel="stylesheet" href="./highlightjs-styles/sunburst.css">
+    <script src="hybrids.js"></script>
+    <script src="menu-component.js"></script>
+    <title>Elm (und Elixir) - finde ich super!</title>
+</head>
+
+<body>
+    <header id="header">
+        <h1>Elm (und Elixir) - finde ich super!</h1>
+        <menu-component></menu-component>
+    </header>
+    <section id="main-content">
+        <article id="elixir_artikel_informatik_aktuell">
+            <h2>
+                Artikel zu Erlang und Elixir auf informatik-aktuell.de
+            </h2>
+            <h3>von Martin Grotz, 2019-11-12</h3>
+            <p>Heute ist ein Artikel von mir auf informatik aktuell erschienen:</p>
+            <p><a
+                    href="https://www.informatik-aktuell.de/entwicklung/programmiersprachen/elixir-und-erlang-nebenlaeufigkeit-ganz-einfach.html">Nebenläufigkeit
+                    ganz einfach mit Elixir und Erlang</a></p>
+            <p>Darin geht es um Erlang, Elixir, Nebenläufigkeit, das Aktor-Modell, und wie man damit Systeme
+                strukturieren kann.</p>
+        </article>
+        <article id="rerun_command_improved">
+            <h2>
+                Verbesserte Variante des rerun-Skripts
+            </h2>
+            <h3>von Martin Grotz, 2019-09-29</h3>
+            <p>Meine ersten Gehversuche mit dem rerun-Befehl waren schon ganz gut. Mittlerweile habe ich mein
+                Shell-Skript zum Starten davon noch ein bisschen verfeinert.</p>
+            <p>Während ich mit Elixir entwickle habe ich in einer Shell parallel jetzt eigentlich immer diesen Befehl
+                laufen:</p>
+            <pre><code>rerun --dir "lib" --dir test --pattern "**/*.{ex,exs}" --exit --clear --name "Tests" -- mix test</code></pre>
+            <p>Dadurch ist das Ergebnis in den Notifications besser zu erkennen und man findet beim Reinschauen dann
+                schneller, was genau das Problem ist.
+                <br>
+                Für die Typanalyse via Dialyizer nutze ich ebenfalls mittlerweile einen rerun-Befehl mit sehr ähnlichem
+                Muster:
+            </p>
+            <pre><code>rerun --dir "lib" --pattern "**/*.ex" --exit --clear --name "Dialyzer" -- mix dialyzer</code></pre>
+        </article>
+        <article id="rerun_command">
+            <h2>
+                "rerun" statt "mix test.watch"
+            </h2>
+            <h3>von Martin Grotz, 2019-08-24</h3>
+            <p>Ich habe in der hörenswerten Podcast-Folge 63 <a
+                    href="https://devchat.tv/elixir-mix/emx-063-designing-elixir-systems-with-otp-with-bruce-tate-and-james-gray/">Designing
+                    Elixir Systems With OTP</a> von Elixir-Mix von einem kleinen Hilfsprogramm gehört, mit
+                dem man beliebige Befehle ausführen lassen kann, sobald sich eine zu einem angegebenen Muster passende
+                Datei ändert: <a href="https://github.com/alexch/rerun">"rerun"</a>.
+                Allerdings ist es ein Ruby Gem, d.h. man benötigt Ruby, was ich auf meinem Linux-System erstmal
+                installieren musste, denn ich mache eigentlich nichts mit Ruby.
+            </p>
+            <p>Danach habe ich mir für meine jeweilige Elixir-Applikation ein kleines Shell-Skript "mix_test_watch.sh"
+                geschrieben, damit ich das Datei-Muster nicht jedesmal auf's Neue eintippen muss:
+            <pre><code>#!/bin/bash
+rerun --dir "lib" --pattern "**/*.ex" -- mix test</code></pre>
+
+            </p>
+            <p>Anschließend noch ein <code>chmod +x ./mix_test_watch.sh</code> und schon habe ich einen startbaren,
+                mitlaufenden Test-Watcher.</p>
+            <p>Alternativ gibt's als Test-Watcher für Elixir auch noch eine spezialisierte Mix-Erweiterung: <a
+                    href="https://hex.pm/packages/mix_test_watch">mix_test_watch</a>. "rerun" kann aber eben nicht nur
+                als Test-Watcher verwendet werden, sondern z.B. auch, um bei jeder Änderung einen Dialyizer
+                (Typ-Analyse-Tool für Erlang/Elixir) Durchlauf zu starten, oder aber in der Extremform mit Hilfe einer
+                anderen Mix-Erweiterung, <a
+                    href="https://github.com/karolsluszniak/ex_check#getting-started">ex_check</a>, gleich das volle
+                Paket (Formatter, Linting, Statische Code-Analyse, Tests, Type-Checker). Wobei dann jeder Durchlauf
+                signifikant Zeit braucht...</p>
+        </article>
+        <article id="phoenix_in_apache_linux_setup">
+            <h2>
+                Eine Elixir Phoenix App in Apache auf einem vServer hosten
+            </h2>
+            <h3>von Martin Grotz, 2019-06-23</h3>
+            <p>ACHTUNG: Der nachfolgende Eintrag ist eher eine Gedächtnisstütze für mich als ein richtig ausgearbeiteter
+                Blog-Post. Aber weil ich das selten mache, und es doch relativ viele Schritte sind, wollte ich sie
+                einfach mal festgehalten haben.</p>
+            <p>Das verbreitetste Release-Tooling für Elixir heißt distillery. Die Installationsanleitung dafür findet
+                sich <a href="https://hexdocs.pm/distillery/introduction/installation.html">hier</a>.</p>
+            <p>Nach einem kurzen Blick in die nach der Installation mit <code>mix release.init</code> erzeugte Datei
+                "rel/config.exs" kann ein erstes Probe-Release gebaut werden mit <code>MIX_ENV=prod mix release</code>
+            </p>
+            <p>Anschließend wird gemäß <a href="https://hexdocs.pm/phoenix/deployment.html#content">der Anleitung</a>
+                das Phoenix Zeugs gebaut.</p>
+            <p>Dann muss noch gemäß <a href="https://hexdocs.pm/distillery/guides/phoenix_walkthrough.html">Distillery
+                    mit Phoenix Walkthrough</a> die Konfiguration von Phoenix angepasst werden.</p>
+            <p>Außerdem brauchen wir einen Ecto Migrations Runner, da wir das ja nicht einfach so machen können. <a
+                    href="https://www.thegreatcodeadventure.com/run-ecto-migrations-in-production-distillery/">Diese
+                    Anleitung</a> hat mir dabei sehr geholfen.</p>
+
+            <p>Bei meinem vServer liegen die Webseiten alle in /var/www/html, also habe ich da einen neuen Unterordner
+                erstellt. Da wird dann die von distillery erzeugte .tar.gz Datei reingelegt und entpackt. Die Datei
+                wurde bei mir lokal unter "_build/prod/rel/run_for_your_lives/releases/0.1.0/" abgelegt.
+                Auf dem remote Server kann das Release dann mit
+                <code>PORT=4002 ./bin/run_for_your_lives foreground</code> probeweise gestartet werden. Erst, wenn da
+                alles glatt läuft, kümmere ich mich um die Einbindung in den Apache. ACHTUNG: Für das automatische
+                Starten später muss der Port in der "config/prod.exs" vor dem Distillery-Build hart kodiert werden!
+            </p>
+
+            <p>In meinem konkreten Fall muss ich jetzt erstmal PostgreSQL installieren und konfigurieren (alles auf
+                Debian buster):
+                Hilfreich dabei war die Kombination von <a href="https://wiki.postgresql.org/wiki/Apt">der PostgreSQL
+                    Anleitung für Debian</a> und <a href="https://wiki.debian.org/PostgreSql">der Installationsanleitung
+                    aus dem Debian Wiki</a>.
+                Und dazu noch das Debian Paket pgadmin4-apache2, damit es direkt in den Webserver eingebunden wurde, so
+                dass ich nicht mit den Kommandozeilen-Tools rumhantieren muss.
+                Die SQL-Daten habe ich vorher aus den lokal angelegten Produktiv-DBs via "Backup" in pgAdmin4 exportiert
+                und einfach als SQL direkt auf dem frisch installierten Server über das dort ebenfalls gerade erst
+                installierte pgAdmin4 über das Query Tool wieder eingespielt.
+            </p>
+            <p>Unter sites-available für meinen Apache musste ich dann noch zwei Dateien anlegen: Eine, die von http auf
+                https weiterleitet, und eine, die die https Anfrage an den Apache dann an die Erlang-App weiterleitet.
+                Für diese Weiterleitung brauchen wir noch zwei Erweiterungen (mods): mod_proxy_http und
+                mod_proxy_wstunnel.
+                Dann die erste Datei: "run_for_your_lives.conf" mit dem Inhalt:
+            <pre><code><VirtualHost run.finde-ich-super.de:80>
+                        ServerName run.finde-ich-super.de
+                    
+                        ServerAdmin martin.grotz@gmx.de
+                        DocumentRoot /var/www/html/run
+                    
+                        ErrorLog ${APACHE_LOG_DIR}/error.log
+                    
+                        RewriteEngine on
+                        RewriteCond %{SERVER_NAME} =run.finde-ich-super.de
+                        RewriteRule ^ https://%{SERVER_NAME}%{REQUEST_URI} [END,NE,R=permanent]
+                    </VirtualHost></code></pre>
+
+            Und dann noch die mit den Weiterleitungen auf die Erlang-Application und dem eigentlichen Setup:
+            <pre><code><IfModule mod_ssl.c>
+                        <VirtualHost run.finde-ich-super.de:443>
+                            ServerAdmin martin.grotz@gmx.de
+                            ServerName run.finde-ich-super.de
+                    
+                            ErrorLog ${APACHE_LOG_DIR}/run_for_your_lives_error.log
+                    
+                            SSLEngine on
+                    
+                            ServerName	run.finde-ich-super.de
+                            SSLCertificateFile <path to SSL Stuff from letsencryot>
+                            SSLCertificateKeyFile <path to SSL Stuff from letsencryot>
+                            Include /etc/letsencrypt/options-ssl-apache.conf
+                    
+                            ProxyPass /socket/ ws://localhost:4002/socket/
+                            ProxyPassReverse /socket/ ws://localhost:4002/socket/
+                            ProxyPass / http://localhost:4002/
+                            ProxyPassReverse / http://localhost:4002/
+                        </VirtualHost>
+                    </IfModule></code></pre>
+
+            Danach den Symlink setzen, damit in "sites-enabled" auch die passende Konfigurationsdatei aus
+            "sites-available" eingebunden ist.
+            </p>
+            <p>Jetzt noch einen Apache-Restart und dann mit "certbot" das Zertifikat um die neue Subdomain erweitern.
+            </p>
+            <p>Am Schluss
+                sollten wir unsere Erlang-Applikation noch direkt beim Hochfahren
+                starten, sonst laufen die Apache-Requests ins Leere.
+                Dazu muss eine Datei angelegt werden: "/lib/systemd/system/run_for_your_lives_phoenix.service", mit
+                ungefähr nachfolgendem Inhalt:
+            <pre><code>
+                    [Unit]
+                        Description=Run For Your Lives Phoenix App
+                        After=network.target
+
+                        [Service]
+                        Type=simple
+
+                        User=<username>
+                        Group=<usergroup>
+
+                        Restart=on-failure
+                        RestartSec=5
+
+                        Environment=LANG=de_DE.UTF-8
+
+                        WorkingDirectory=/var/www/html/run
+                        ExecStart=/var/www/html/run/bin/run_for_your_lives foreground
+                        RemainAfterExit=no
+                        SyslogIdentifier=run_for_your_lives
+
+                        [Install]
+                        WantedBy=multi-user.target
+                </code></pre>
+            Die müssen wir dann noch beim System bekannt machen: "systemctl enable
+            run_for_your_lives_phoenix.service". Anleitung übrigens <a
+                href="https://elixirforum.com/t/elixir-apps-as-systemd-services-info-wiki/2400">aus dem Elixir
+                Forum</a>
+            </p>
+
+        </article>
+        <article id="meetup_und_dotnetday">
+            <h2>
+                Lambda Lounge Meetup Anfang April & dotnet Day Franken
+            </h2>
+            <h3>von Martin Grotz, 2019-04-07</h3>
+            <p>
+                Anfang April war es mal wieder soweit: Die <a
+                    href="https://www.meetup.com/de-DE/Lambda-Lounge-Funktionale-Programmierung-Nurnberg/events/260077807/">Lambda
+                    Lounge</a> hat sich in Erlangen getroffen, um über Daten und (Typ-)Klassen zu reden.
+                Der Vortrag war sehr interessant und die Diskussion im Anschluss facettenreich.
+                Ich freue mich auf die Fortsetzung des Meetups im Mai.
+            </p>
+            <p>Außerdem hatte ich die Gelegenheit mit meinem Kollegen <a href="https://draptik.github.io/">Patrick</a>
+                zusammen einen Workshop zum Thema "Funktionale Programmierung in C# und F#" abzuhalten.
+                Dafür waren wir auf der lokalen Konferenz <a
+                    href="https://www.dotnet-day-franken.de/workshops/item/6-ws5-von-c-zu-f-einfuehrung-in-die-funktionale-programmierung">dotnet
+                    Day Franken</a>.
+                Die Konferenz war super - sowohl der Workshop-Tag als auch der nachfolgende Konferenztag. Nächstes Jahr
+                werde ich da auf jeden Fall wieder dabei sein.</p>
+            <p>Und weil ich mit dem Meetup und vor allem mit der Vorbereitung des Workshops so viel zu tun hatte, gab's
+                hier auch solange nichts Neues.
+                Vermutlich wird das auch bis Mai so bleiben, da schon <a href="./events.html">der nächste Vortrag</a>
+                (und die entsprechende Vorbereitung) ansteht.
+            </p>
+        </article>
+        <article id="meetup_treffen_im_februar">
+            <h2>
+                Lambda Lounge Meetup Ende Februar
+            </h2>
+            <h3>von Martin Grotz, 2019-03-06</h3>
+            <p>Am Montag letzte Woche gab es wieder <a
+                    href="https://www.meetup.com/de-DE/Lambda-Lounge-Funktionale-Programmierung-Nurnberg/events/259086339/">ein
+                    Treffen der Lambda Lounge</a> - also des Functional Programming Meetups Nürnberg.
+                Diesmal waren wir in den Räumlichkeiten der <a href="https://www.redheads.de/">redheads Ltd.</a> -
+                vielen Dank dafür!
+            </p>
+            <p>Thematisch ging es um Funktoren, Applicatives und Monaden - der Vortrag war sehr aufschlussreich. Auch
+                die anschließende Diskussion hat mir viele neue Einsichten beschert. Beim gemütlichen Beisammensein
+                ließen wir den Abend ausklingen.</p>
+            <p>Ich freue mich schon auf das nächste Treffen - ein Thema steht allerdings noch nicht fest. Updates gibt
+                es als erstes auf der <a
+                    href="https://www.meetup.com/de-DE/Lambda-Lounge-Funktionale-Programmierung-Nurnberg/">Meetup-Seite</a>.
+            </p>
+        </article>
+
+        <article id="vortrag_parallel">
+            <h2>
+                Elixir, Phoenix & Elm Vortrag auf der parallel Konferenz
+            </h2>
+            <h3>von Martin Grotz, 2019-02-23</h3>
+            <p>
+                Am Mittwoch und Donnerstag war ich auf der parallel Konferenz in Heidelberg und habe dort einen <a
+                    href="https://www.parallelcon.de/veranstaltung-7599-skalierbare-webanwendungen-mit-elixir%2C-phoenix-und-elm.html?source=0&id=7599">Vortrag
+                    über Elixir, Phoenix und Elm</a> gehalten.
+                Die Konferenz hat mir insgesamt gut gefallen, auch wenn die Themenschwerpunkte nicht so meine sind. Dazu
+                sind High Performance Computing und C/C++ einfach zu weit weg von meinem Arbeitsalltag. Trotzdem fand
+                ich es total interessant, mal in eine "andere Welt" der Software-Probleme und -Problemlösungen
+                reinschnuppern zu können.
+                Jetzt geht es vortragsmäßig erstmal in ruhigeres Fahrwasser. Die nächsten Wochen werde ich mich auch
+                erstmal wieder mehr F# zuwenden, um mich für den <a
+                    href="https://dotnet-day-franken.de/workshops/item/6-ws5-von-c-zu-f-einfuehrung-in-die-funktionale-programmierung">Workshop
+                    beim .NET Day Franken</a> vorzubereiten.
+            </p>
+        </article>
+        <article id="vortrag_ct_webdev">
+            <h2>
+                Elm-Vortrag auf der c't webdev Konferenz
+            </h2>
+            <h3>von Martin Grotz, 2019-02-19</h3>
+            <p>Ich hänge weiterhin hinterher, aber: Vor zwei Wochen war ich als Sprecher auf der
+                <a href="https://ctwebdev.de/programm.html#slot-22">c't webdev Konferenz</a>. Die Konferenz war in einem
+                architektonisch sehr interessanten Gebäude, dem KOMED in Köln. </p>
+            <p>Organisation, Technik und Catering waren top, aber dadurch, dass die Konferenz ausverkauft war, ging es
+                teilweise doch ziemlich eng zu. Keynotes und Speaker waren ebenfalls vom Feinsten.</p>
+            <p>Die Konferenz soll nächstes Jahr wieder stattfinden (in
+                einer vergrößerten Location) - meiner Meinung nach eine klare Empfehlung. Wenn ich die Möglichkeit habe,
+                werde ich auf jeden Fall wieder dabei sein.</p>
+        </article>
+
+        <article id="artikel_elixir_heise_developer_teil2">
+            <h2>
+                Elm-Artikel auf heise-developer
+            </h2>
+            <h3>von Martin Grotz, 2019-02-14</h3>
+            <p>Der versprochene zweite Teil des Elixir&Elm-Artikels <a
+                    href="https://www.heise.de/developer/artikel/Weboberflaechenentwicklung-mit-Elm-4301420.html"></a>
+                auf heise-developer ist online!</p>
+            <p>Und wie beim vorherigen Artikel gilt natürlich auch hier: Falls es noch Fragen oder Anmerkungen gibt,
+                einfach melden.</p>
+        </article>
+
+        <article id="artikel_elixir_heise_developer_teil1">
+            <h2>
+                Event-Seite & Elixir-Artikel auf heise-developer
+            </h2>
+            <h3>von Martin Grotz, 2019-02-07</h3>
+            <p>Aktuell hänge ich ein bisschen hinterher mit meinem Blog im Gegensatz zu den sonstigen Events.
+                Deshalb gibt es jetzt der Übersichtlichkeit halber eine neue Unterseite: <a
+                    href="./events.html">Events&Termine</a>.
+                Dort liste ich die Termine meiner Vorträge auf und auch, wenn ich mal irgendwo einen Artikel
+                veröffentlicht habe.
+            </p>
+            <p>Genau so eine Veröffentlichung gab es auch letzten Freitag, und zwar einen <a
+                    href="https://www.heise.de/developer/artikel/Skalierbare-robuste-Webanwendungen-mit-Elixir-und-Phoenix-4286403.html">Artikel
+                    zu Elixir und Phoenix auf heise-developer</a>. Falls es zu dem Artikel noch Fragen oder Anmerkungen
+                gibt - immer her damit!</p>
+            <p>In den nächsten Tagen wird es auch den zweiten Teil dort zu lesen geben, in dem zum Elixir-Backend ein
+                Elm-Frontend gebaut wird.</p>
+        </article>
+
+        <article id="zusammenfassung_erstes_lambda_lounge_meetup">
+            <h2>
+                Die Lambda Lounge ist eröffnet
+            </h2>
+            <h3>von Martin Grotz, 2019-01-31</h3>
+            <p>
+                Vorgestern war das erste Treffen der <a href="">Lambda Lounge</a>. Mir hat es eine Menge Spaß gemacht,
+                was sicher auch an der enormen Breite von Hintergründen und FP-Erfahrung lag, die am Start war: Von
+                Entwicklern ganz ohne FP-Erfahrung bis zu ausgewiesenen Profis, die sogar Vorlesungen zum Thema halten,
+                war alles dabei.
+            </p>
+            <p>Gleich zu Beginn gab es eine Selbsteinschätzung der Teilnehmer auf einer Klebetafel (die Idee zu den
+                Klebepunkten habe ich von <a href="https://twitter.com/marcoemrich">Marco Emrich</a> übernommen). Mal
+                sehen, wie das in 12 Monaten dann aussieht:</p>
+            <img src="meetup_selbsteinschaetzung_erstes-treffen.jpg"
+                alt="Selbsteinschätzung FP Wissen Teilnehmer Lambda Lounge beim ersten Treffen" />
+            <p>Danach haben wir noch überlegt, wie wir in Zukunft weitermachen wollen: Mit einer Mischung aus
+                theoretischen Impulsvorträgen und praktischer Anwendung des jeweils Gelernten werden wir in den
+                nächsten Monaten an den Start gehen.</p>
+            <p>Zum Abschluss habe ich noch eine kleine Live-Coding-Session mit Elm gemacht.</p>
+            <p>Ich freue mich auf jeden Fall schon auf das nächste Treffen der Lambda Lounge, welches aller
+                Wahrscheinlichkeit Mitte/Ende Februar stattfinden wird. Vielen Dank an dieser Stelle auch nochmal an <a
+                    href="https://github.com/mgttlinger">Merlin Göttlinger</a> für die Organisation des Raumes!</p>
+        </article>
+        <article>
+            <h2>
+                Quellcode zum OOP Vortrag
+            </h2>
+            <h3>von Martin Grotz, 2019-01-30</h3>
+            <p>Der <a
+                    href="https://www.oop-konferenz.de/oop2019/programm/konferenzprogramm/sessiondetails/action/detail/session/mi-23-4/title/hyperproduktiv-mit-elixir-phoenix-und-elm.html">Vortrag
+                    auf der OOP 2019</a> ist vorbei. Mir hat es Spaß gemacht und ich glaube, die Zuhörer fanden es
+                auch ganz okay.</p>
+            <p>Den Quellcode zum Vortrag gibt es <a href="https://github.com/groma84/guess-the-number-elixir">auf
+                    meinem github-Account</a>. Bei Fragen, Anmerkungen oder Verbesserungsvorschlägen schreibt mir
+                einfach eine Nachricht.</p>
+        </article>
+
+        <article>
+            <h2>
+                Vortrag auf der OOP Konferenz
+            </h2>
+            <h3>von Martin Grotz, 2019-01-21</h3>
+            <p>Nachdem es bedingt durch einen Server-Umzug und die Feiertage hier länger nichts Neues gab, gibt es nun
+                doch mal wieder was:</p>
+            <p>Ich war nicht gänzlich untätig, sondern habe meine Elm-Kenntnisse mit einer passenden
+                Server-Programmiersprache kombiniert: Elixir.
+                Daraus ist ein Vortrag entstanden, den ich übermorgen auf der OOP 2019 halten werde. Die Details finden
+                sich <a
+                    href="https://www.oop-konferenz.de/oop2019/programm/konferenzprogramm/sessiondetails/action/detail/session/mi-23-4/title/hyperproduktiv-mit-elixir-phoenix-und-elm.html">im
+                    Konferenzprogramm</a>.
+                Ich freu mich schon riesig drauf, und danach geht's hier auch wieder mit neuen echten Inhalten in
+                Sachen Elm (und Elixir) weiter!
+            </p>
+        </article>
+       
+        <!-- <article id="">
+            <h2>
+
+            </h2>
+            <h3></h3>
+            <p></p>
+        </article> -->
+    </section>
+
+    <script src="./highlight.pack.js"></script>
+    <script src="ie11iscrap.js"></script>
+
+</body>
+
+</html>
