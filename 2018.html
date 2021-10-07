@@ -12,12 +12,12 @@
     <link rel="stylesheet" href="./highlightjs-styles/sunburst.css">
     <script src="hybrids.js"></script>
     <script src="menu-component.js"></script>
-    <title>Elm (und Elixir) - finde ich super!</title>
+    <title>Elm (und Elixir, und anderes Zeugs) - finde ich super!</title>
 </head>
 
 <body>
     <header id="header">
-        <h1>Elm (und Elixir) - finde ich super!</h1>
+        <h1>Elm (und Elixir, und anderes Zeugs) - finde ich super!</h1>
         <menu-component></menu-component>
     </header>
     <section id="main-content">
@@ -289,11 +289,13 @@ view model =
             <p>Einmal ist das
                 <a href="https://www.youtube.com/watch?v=Up7LcbGZFuo">"Domain Modeling Made Functional"</a> vom
                 großartigen Scott Wlaschin. Die Beispiele sind zwar in F#, lassen
-                sich aber größtenteils gut auf Elm übertragen.</p>
+                sich aber größtenteils gut auf Elm übertragen.
+            </p>
             <p>Und das zweite Video ist
                 <a href="https://www.youtube.com/watch?v=IcgmSRJHu_8">"Making Impossible States Impossible"</a> von
                 Richard Feldman. Hier sind praktischerweise alle Beispiele
-                auch gleich in Elm.</p>
+                auch gleich in Elm.
+            </p>
         </article>
         <article>
             <h2>
@@ -376,7 +378,8 @@ view model =
                 können
                 wir eine Funktion schreiben, die mit einem
                 <code class="inline">case ... of</code> die verschiedenen Fälle auswertet. Das nennt man dann Pattern
-                Matching:</p>
+                Matching:
+            </p>
             <pre><code>farbeZuHex : Hintergrundfarbe -> String
 farbeZuHex hintergrundfarbe =
     case hintergrundfarbe of
@@ -390,7 +393,8 @@ farbeZuHex hintergrundfarbe =
                 <code class="inline">_ -> ...</code> einen Standardfall festlegen, der immer dann ausgeführt wird, wenn
                 kein anderer Zweig passt, aber dann hebelt
                 man einen wichtigen Schutzmechanismus gegen Programmierfehler aus, daher ist nicht unbedingt
-                empfehlenswert.</p>
+                empfehlenswert.
+            </p>
             <p>Eine weitere wichtige Einsatzmöglichkeit von Union Types sind die sogenannten Single Case Union Types.
                 Diese
                 dienen vor allem dazu, Funktionsparameter eindeutig festzulegen, so dass man nicht aus Versehen zum
@@ -411,7 +415,8 @@ errechneBmi (Gewicht gewicht) (Groesse groesse) =
                 dass die Reihenfolge wirklich eingehalten werden muss. Wäre die Funktionssignatur ein
                 <code class="inline">Float -> Float -> Float</code> bestündie die sehr große Gefahr, dass man Gewicht
                 und Größe beim Aufruf vertauscht und dabei sinnlose Ergebnisse
-                erhält, obwohl der Compiler grünes Licht gibt.</p>
+                erhält, obwohl der Compiler grünes Licht gibt.
+            </p>
             <p>In der berechneBmi-Funktion sieht man auch, wie man einen solchen Union Type auch gleich elegant
                 "auspacken"
                 kann, so dass man direkt mit den "enthaltenen" Floats arbeiten kann.</p>
@@ -447,7 +452,8 @@ flaeche form =
                 noch beim Programmieren wenig fehleranfällig ist. Deshalb bilden Union Types meist das Rückgrat jeder
                 Elm-Typbeschreibung.</p>
             <p>Die ausführlichere offizielle Doku zum Thema findet sich
-                <a href="https://guide.elm-lang.org/types/union_types.html">auf der Elm-Seite</a>.</p>
+                <a href="https://guide.elm-lang.org/types/union_types.html">auf der Elm-Seite</a>.
+            </p>
         </article>
 
         <article>
@@ -471,20 +477,23 @@ flaeche form =
 [ 1, 2, 3, 5, 7, 11 ]</code></pre>
             <p>Es gibt auch einige andere Möglichkeiten, Listen zu erzeugen. Hierzu verweise ich auf die
                 <a href="http://package.elm-lang.org/packages/elm-lang/core/latest/List">Elm-Dokumentation zur
-                    Liste</a>.</p>
+                    Liste</a>.
+            </p>
             <p>Es gibt auch noch eine Menge weiterer Funktionen, die auf Listen operieren. Besonders hervorheben möchte
                 ich
                 hier die Möglichkeit, via
                 <code class="inline">head</code> auf das erste Element einer Liste zugreifen zu können - das machen wir
                 uns in einem späteren Eintrag beim
                 Einführen des Pattern Matching zu nutze, und
-                <code class="inline">map</code>. </p>
+                <code class="inline">map</code>.
+            </p>
             <p>Mit
                 <code class="inline">map</code> kann man über alle Elemente einer Liste iterieren und auf jedes Element
                 eine Funktion anwenden. Das Ergebnis
                 dieser Funktion wird dann an die gleiche Stelle einer neuen Liste geschrieben. Dies bildet eine
                 mächtige
-                Möglichkeit, alle Elemente einer Liste zu transformieren.</p>
+                Möglichkeit, alle Elemente einer Liste zu transformieren.
+            </p>
             <pre><code>-- Listen
 liste : List Int
 liste =
@@ -606,7 +615,8 @@ x =
     someFunc somePoint anotherPoint</code></pre>
 
                 <p>Noch mehr Infos zu Records gibt es
-                    <a href="http://elm-lang.org/docs/records">in der offiziellen Elm-Doku</a>.</p>
+                    <a href="http://elm-lang.org/docs/records">in der offiziellen Elm-Doku</a>.
+                </p>
             </section>
             </p>
 
@@ -630,7 +640,8 @@ x =
             </p>
             <p>Die Code-Beispiele finden sich
                 <a href="https://github.com/groma84/a-cure-for-runtime-errors-elm-vortrag">auf meinem
-                    Github-Account</a>.</p>
+                    Github-Account</a>.
+            </p>
         </article>
         <article>
             <h2>
@@ -664,7 +675,8 @@ x =
             <p>Anschließend wird erstmal aufgeräumt: Im
                 <code class="inline">public</code>-Ordner, der die statischen Ressourcen enthält, werfen wir alles
                 außer
-                <code class="inline">index.html</code> weg.</p>
+                <code class="inline">index.html</code> weg.
+            </p>
 
             <p>Nun folgt noch der
                 <code class="inline">source</code>-Ordner, der den eigentlichen Elm-Quellcode enthält. Hier entfernen
@@ -695,7 +707,8 @@ view model =
             <h2>Elm-Schnellstart</h2>
             <h3>von Martin Grotz, 2018-04-17</h3>
             <p>Die Installation von Elm ist sehr einfach. Die einzige Voraussetzung ist ein aktuelles
-                <a href=" https://nodejs.org ">node.js</a>.</p>
+                <a href=" https://nodejs.org ">node.js</a>.
+            </p>
             <p>Anschließend kann man alle wichtigen Tools und die Programmiersprache selbst mit einem einzigen Befehl
                 herunterladen:
                 <code>npm install elm elm-format create-elm-app --global</code> Danach können wir uns schon eine erste

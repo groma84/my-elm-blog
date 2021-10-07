@@ -1,8 +1,8 @@
 # my-elm-blog
-The stuff for my own elm blog
+The stuff for my own blog
 
 ## Deployment 
-On the webserver an Apache redirect rule redirects from index.html to the last active yeaer (e.g. 2021.html).
+On the webserver an Apache redirect rule redirects from index.html to the last active year (e.g. 2021.html).
 This allows links to work in the future, but index.html still "seems to work".
 This needs to be updated every year!
 
