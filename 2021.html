@@ -22,16 +22,680 @@
         <menu-component></menu-component>
     </header>
     <section id="main-content">
-        <!-- Ideen:
-            - Update Talks (waren ja doch so einige)
-            - Buch-Rezensionen
-                - Leadership and Self-Deception
-                - Das erste Drittel von Grokking Simplicity
-                - Radikale Hoffnung
-                - Storyworthy
-            (- Erfahrungen mit Svelte und warum kein Elm)
-        
-        -->
+        <article id="serene-sitting-with-sutil">
+            <h2>Serene Sitting with Sutil 
+                <span><a href="https://elm.finde-ich-super.de/2021.html#serene-sitting-with-sutil">🔗</a></span>
+            </h2>
+            <h3>von Martin Grotz, 2021-12-08</h3>
+
+            <h2>Preface</h2>
+            <p>Today for the <a href="https://sergeytihon.com/2021/10/18/f-advent-calendar-2021/">F# advent calendar</a>
+                we'll be building a very simple web-based meditation session timer with sounds with the help of F# and
+                <a href="https://sutil.dev/">Sutil</a>.</p>
+            <p>F# is a functional-first multiparadigm general-purpose programming language living in the .NET ecosystem.
+                It's pragmatic, concise, relatively small and stable, yet very powerful.</p>
+            <p>Writing an interactive web application is usually done in JavaScript or TypeScript. But we can also use
+                other languages, like F#. The <a href="https://fable.io/">Fable compiler</a> allows us to write F# code
+                (with some additional annotations and a few limitations) and compile it to JavaScript to run it in the
+                browser (or in other places where JavaScript can be run, like Node.js or Electron apps). On top of the
+                Fable compiler sit different other libraries, each with their own focus: For example if you want to get
+                a React app as output there is <a href="https://github.com/Zaid-Ajaj/Feliz">Feliz</a>.</p>
+            <p>But in JavaScript-land there's a new kind of framework (or more precisely: compiler) with <a
+                    href="https://svelte.dev/">Svelte</a>: There the code you write is compiled by the Svelte compiler
+                into reactive JavaScript code, and no big initial runtime file is required. Svelte also avoids a virtual
+                DOM and thus gains improved performance. Only the parts explicitly marked as reactive are updated, and
+                only when necessary.</p>
+            <p>Sutil brings these ideas into the F#/Fable world. The ideas and resulting web application follow the
+                Svelte model, but we can write F# instead of JavaScript or TypeScript! Sutil borrows parts from other
+                projects (e.g. the HTML engine is taken from Feliz) and combines them with its own ideas. Sutil is still
+                very much in beta, and the documentation is incomplete and a lot of features are not implemented yet. I
+                still wanted to take it out for a spin and see if my small idea can be done.</p>
+            <p>Warning: I am not an experienced F# programmer, and I have only dabbled in Fable a little bit. So some
+                things can very likely be solved more elegantly than I did...</p>
+            <h2>What are we building?</h2>
+            <p>Our goal is a small website where we plan and run a personal meditation session: Steps can be added with
+                a duration in minutes and one of two sounds that is played when the duration is up. Multiple steps can
+                be queued before the session gets started.</p>
+            <p>In the end it will look like this:
+                <img src="./screenshot_sutil-meditation-timer_1.png" alt="The finished app">
+            </p>
+            <p>We won't be doing any styling and will only do very basic functionality to keep the code size and
+                complexity in check. We will also sacrifice writing tests (don't do this in any real project!) for
+                brevity.</p>
+            <p>I'll be using Windows 10 and VSCode as an IDE with the Ionide plugin, node.js 16 and dotnet5.</p>
+            <p>The full code is accessible <a href="https://github.com/MATHEMA-GmbH/blog-fsharp-sutil-mgrotz">on Github</a>.</p>
+            <h2>The basic architecture</h2>
+            <p>As I am a big fan of Elm we will use Sutil with the &quot;Elmish&quot; architecture. Apart from the
+                official documentation of <a href="https://guide.elm-lang.org/architecture/">The Elm Architecture</a>
+                there also exists a <a href="https://zaid-ajaj.github.io/the-elmish-book/#/">very useful book</a> that
+                describes it in the Fable context.</p>
+            <p>In short it means that the data in our application flows only in one direction: The application state is
+                stored in the model (an F# record), which in turn is given to the view function (a normal function
+                returning a SutilElement). The view function can emit Messages via a dispatch function. These Messages
+                are then sent to the update function that returns a changed model. The parts of the view we have marked
+                as reactive are updated and the cycle starts anew. In Sutil the view function is only called once, but
+                everything that is reactive within the view gets updated when the value it is bound to changes.
+                <img src="./sutil-app-architecture-1.svg" alt="Sutil App Architecture">
+            </p>
+            <p>The empty project, but with all the resources we need, can be cloned most easily with
+                <code class="inline">npx degit MATHEMA-GmbH/blog-fsharp-sutil-mgrotz#fresh-start blog-fsharp-sutil-mgrotz</code>.
+                Afterwards one run of <code class="inline">dotnet tool restore &amp;&amp; npm install</code> in the project folder
+                installs all the dependencies and starting it with <code class="inline">npm run start</code> makes it accessible in the
+                browser at <code class="inline">http://localhost:8080/</code>.</p>
+            <h2>First increment: Duration input</h2>
+            <p>All our changes are done in the same way: Think about what needs to change in the state (Model), then how
+                it will be shown (View) and then how Messages from the view will change the state (Update). That's the
+                beauty of the MVU architecture - it allows a very structured approach!</p>
+            <p>All code goes into the <code class="inline">App.fs</code> file - the program is small enough to fit into one file! At
+                the very top we need a few imports in our module:</p>
+            <pre><code class="fsharp">module App
+
+open Sutil
+open Sutil.DOM
+open Sutil.Attr
+open Sutil.Helpers
+</code></pre>
+            <p>First we define our Model as a record and update its init function that is called once on program start
+                and a helper function to get the value out of the record more easily:</p>
+            <pre><code class="fsharp">type Model = { LastTimerValue : int  }
+let getLastTimerValue m = m.LastTimerValue
+
+let init () : Model= ({ LastTimerValue = 1 })
+</code></pre>
+            <p>Next we'll create a new function that returns a partial view. The store is a data structure used by Sutil
+                to allow us to subscribe to value changes and thus add reactivity to our application. The dispatch
+                function is needed to dispatch Messages from events in the view to the update function.</p>
+            <pre><code class="fsharp">  Html.ul [
+      Html.li [
+        Html.label [Html.text &quot;How many minutes should the next timer last?&quot;]
+        Html.input  [
+          // we have to use type' here, because type is a reserved word in F#
+          type' &quot;number&quot;
+          Attr.value (model |&gt; Store.map getLastTimerValue |&gt; Store.distinct, LastTimerValueChanged &gt;&gt; dispatch)
+          Attr.min 1
+          Attr.max 15
+          Attr.placeholder &quot;How many minutes?&quot;
+        ]
+      ]
+  ]
+</code></pre>
+            <p>The Html namespace allows us to create HTML elements, and the list given to each element allows us to
+                state both sub-elements and attributes.</p>
+            <p><code class="inline">Attr.value</code> creates a reactive binding from a store value to the input value, so the DOM part
+                gets updated whenever the given value changes. <code class="inline">Store.map</code> allows us to map the store value
+                (in our case the complete Model) to something else, here just the <code class="inline">LastTimerValue</code>. We then
+                pipe this into <code class="inline">Store.distinct</code> to avoid updating the value every time anything in the model
+                changes. The second part of the tupled argument to <code class="inline">Attr.value</code> is what should happen when
+                the value changes in the input field. Here we want to dispatch the Message
+                <code class="inline">LastTimerValueChanged</code>.</p>
+            <p>Adding this Message subtype to the union type for all messages allows us to handle it in the update
+                function and return a changed model with the new value:</p>
+            <pre><code class="fsharp">type Message =
+  | LastTimerValueChanged of int
+  
+let update (msg : Message) (model : Model) : Model =
+  match msg with
+  | LastTimerValueChanged newValue -&gt; { model with LastTimerValue = newValue }
+</code></pre>
+            <p>Now we can add our sub-view to the main view of the application:</p>
+            <pre><code class="fsharp">let view() =
+  // create the application with The Elm Architecture
+  let model, dispatch = () |&gt; Store.makeElmishSimple init update ignore
+
+  Html.div [
+      Html.div [
+          planEditView model dispatch
+      ]
+  ]
+</code></pre>
+            <p>And finally initialize the whole program with all the functions we created at the end of our App.fs file:
+            </p>
+            <pre><code class="fsharp">view() |&gt; Program.mountElement &quot;sutil-app&quot;
+</code></pre>
+            <p>With this code in place the app can be started via <code class="inline">npm run start</code> and opened in the browser
+                at <code class="inline">http://localhost:8080/</code>.</p>
+            <h2>Second increment: Adding steps</h2>
+            <p>But the minutes alone won't make a good meditation timer app. We also need to add multiple steps with a
+                sound when their time is up.</p>
+            <p>We can use the same approach as in the first increment: Extend the Model, extend the view, extend the
+                Message union type and the update function.</p>
+            <p>Our model gains a new field and a new value function:</p>
+            <pre><code class="fsharp">type Model = { 
+  (...)  
+  TimerStepsReversed : TimerStep list
+  }
+    
+let getTimerSteps m = m.TimerStepsReversed |&gt; List.rev    
+</code></pre>
+            <p>We also need the new record type <code class="inline">TimerStep</code> and a way to express the diffent possible sounds.
+                Oh, and a few helper functions for unique ID generation from Sutil. As F# is always parsed from top to
+                bottom these have to be placed before the Model type definition:</p>
+            <pre><code class="fsharp">let idGenerator = makeIdGenerator ()
+
+type Sound =
+    | SingleShortBell
+    | SingleLongBell
+let soundToString sound =
+    match sound with
+    | SingleShortBell -&gt; &quot;A single short bell chime&quot;
+    | SingleLongBell -&gt; &quot;A single long bell chime&quot;
+let soundToFile sound =
+    match sound with
+    | SingleShortBell -&gt; &quot;powerUp7.wav&quot;
+    | SingleLongBell -&gt; &quot;FileLoad.wav&quot;
+    
+type TimerStep = {
+    StepId : int
+    Minutes : int
+    Sound : Sound
+}
+let createStep minutes sound = 
+    {StepId = idGenerator(); Minutes = minutes; Sound = sound;}
+</code></pre>
+            <p>Next we extend our sub-view function and add some buttons, one for each of our two possible sounds after
+                the existing <code class="inline">Html.li</code> element:</p>
+            <pre><code class="fsharp">Html.li [
+    (...)
+]
+
+Html.li [
+  Html.button [
+      type' &quot;button&quot;
+      onClick (fun _ -&gt; dispatch AddSingleShortBell) []
+      Html.text &quot;Add single short bell&quot;
+  ]
+
+  Html.button [
+      type' &quot;button&quot;
+      onClick (fun _ -&gt; dispatch AddSingleLongBell) []
+      Html.text &quot;Add single long bell&quot;
+  ]
+] 
+</code></pre>
+            <p>Each button dispatches a different Message when clicked. The list which is the second argument to
+                <code class="inline">onClick</code> allows event modifiers for browser events, things like &quot;stopPropagation&quot;
+                or &quot;preventDefault&quot;.</p>
+            <p>Of course we now need the two new Message cases and the update function to handle them:</p>
+            <pre><code class="fsharp">type Message =
+  (...)
+  | AddSingleShortBell
+  | AddSingleLongBell
+
+let update (msg : Message) (model : Model) : Model =
+  match msg with
+  (...)
+  | AddSingleShortBell -&gt; 
+      let withNewStep = (createStep model.LastTimerValue SingleShortBell) :: model.TimerStepsReversed
+      { model with TimerStepsReversed = withNewStep }
+  | AddSingleLongBell -&gt; 
+      let withNewStep = (createStep model.LastTimerValue SingleLongBell) :: model.TimerStepsReversed
+      { model with TimerStepsReversed = withNewStep }
+</code></pre>
+            <p>We create the new step and prepend it to the existing steps - which is why we stored those in reverse in
+                the model. Prepending to an existing list is cheap in F#, but appending is expensive. Thus it's often
+                best to store things in reverse in a list and only get them in the &quot;right&quot; order when used.
+            </p>
+            <p>By the way: If we want to log something to the browser console we can do this with a function from Fable
+                (although this breaks the &quot;side-effect freeness&quot; of the normal Elm Architecture):</p>
+            <pre><code class="fsharp">Browser.Dom.console.info(Fable.Core.JS.JSON.stringify withNewStep)
+</code></pre>
+            <p>These changes are enough to allow us to add steps to our meditation timing plan. If the dev server is
+                still running we almost instantly see the code changes at <code class="inline">http://localhost:8080</code> - if the
+                code compiles that is.</p>
+            <h2>Third increment: Displaying the added steps</h2>
+            <p>After adding steps we need to display them, and this will be the first time we will need reactive
+                bindings for whole elements and lists of elements the first time.</p>
+            <p>What we won't need are changes to our Model and the update function, though. We already have everything
+                we need, we just need a new sub-view function:</p>
+            <pre><code class="fsharp">let meditationPlanView (model: IStore&lt;Model&gt;) dispatch =
+  fragment 
+    [
+      Html.h2 &quot;Meditation session plan&quot;
+      Bind.el (model |&gt; Store.map getTimerSteps, fun steps -&gt;
+      if List.isEmpty steps then
+          Html.h3 &quot;No steps planned yet&quot;
+      else
+      Html.ul 
+        [
+        Bind.each ((model |&gt; Store.map getTimerSteps), (fun step -&gt;
+          Html.li [
+            Html.span $&quot;{soundToString step.Sound} after {step.Minutes} minute(s)&quot;
+          ] )
+          )
+        ]
+      )
+    ]
+</code></pre>
+            <p>Four things are of interest here:</p>
+            <ol>
+                <li>
+                    <p>We need to wrap the list of HTML elements we want to return from a view function into
+                        <code class="inline">fragment [...]</code> so it can be inserted correctly in the parent view if we want to
+                        return multiple elements at the same nesting level.</p>
+                </li>
+                <li>
+                    <p><code class="inline">Bind.el</code> creates a reactive binding: The first part of the tupled argument is the
+                        store value we bind to, and the second is the code that gets executed everytime the value
+                        changes. In our case we bind to our list of timer steps and display either a text if the list is
+                        still empty, or a list of the steps.</p>
+                </li>
+                <li>
+                    <p><code class="inline">Bind.each</code> creates a reactive binding, too, but this time the value needs to be a
+                        list of things, and the executed function gets each element in turn and produces a
+                        <code class="inline">SutilElement</code> for each element of the list. We use this to create a list of the
+                        steps whenever that list changes.</p>
+                </li>
+                <li>
+                    <p>Most HTML element functions allow a string as the only argument, this is shorthand for e.g.
+                        <code class="inline">Html.span [Html.text &quot;our text&quot;]</code>. We use the relatively new string
+                        interpolation feature in F# to display the name of the selected sound and the duration of the
+                        timer step with
+                        <code class="inline">$&quot;{soundToString step.Sound} after {step.Minutes} minute(s)&quot;</code>.</p>
+                </li>
+            </ol>
+            <p>Now all that's left is to add our new view function in the main view function of our app:</p>
+            <pre><code class="fsharp">let view() =
+  (...)
+  
+  Html.div [
+      Html.div [
+          (...)
+          meditationPlanView model dispatch
+      ]
+  ]
+</code></pre>
+            <p>This makes the list of already added steps visible.</p>
+            <h2>Fourth increment: Starting the session</h2>
+            <p>Now comes the heart of our application and the most complicated part: Starting the timer, letting time
+                pass and walking through the meditation plan step by step. Plus we want to remove some things from the
+                DOM while our timer is running.</p>
+            <p>So, as usual, we start with extending the Model with quite some field:</p>
+            <pre><code class="fsharp">type Model = { 
+  (...)
+  Running : bool
+  StartTime : Ticks
+  ElapsedTimeSinceStart : Ticks
+  PlayPlan : PlayPlan option
+  }
+    
+let getRunning m = m.Running
+let getElapsedTime m = m.ElapsedTimeSinceStart
+let getPlayPlan m = m.PlayPlan
+
+let init () : Model= ({ 
+  (...)
+  Running = false
+  StartTime = Ticks 0L // the L marks the 0 as an int64 (&quot;long&quot;) in F#
+  ElapsedTimeSinceStart = Ticks 0L
+  PlayPlan = None
+  })
+</code></pre>
+            <p>We also need new types: Ticks to give the int64 we get from .NET's DateTime's Ticks property a more
+                semantic name and the PlayPlan record to store the steps with additional info:</p>
+            <pre><code class="fsharp">type Ticks = Ticks of int64
+let formatElapsedTime (Ticks elapsedTime) : string =
+  System.TimeSpan(elapsedTime).ToString()
+
+type StepWithEndTime = {
+  Step: TimerStep
+  EndTime: Ticks
+}
+
+type PlayPlan = {
+  CurrentStep : StepWithEndTime
+  RemainingSteps : StepWithEndTime list
+}
+    
+</code></pre>
+            <p>The helper function for Ticks' formatting shows that we can also call some .NET functionality directly
+                via the Fable compiler's magic - but not everything is supported. For example we can't use a custom
+                format string with TimeSpan's ToString() method, because Fable does not support this (yet).</p>
+            <p>Our PlayPlan consists of both the currently active step and all the remaining steps. This makes our
+                intention clear that we always need a valid CurrentStep when running our timer. In our model it's
+                optional - which means we wrap it in an <a
+                    href="https://fsharpforfunandprofit.com/posts/the-option-type/">Option type</a> to explicitly state
+                it can be missing while still avoiding the dreaded Null.</p>
+            <p>But at first we need a button to start our session, which should only be visible while there is at least
+                one meditation timer step and our timer is not running, yet. We'll implement it in its own sub-view
+                function. Oh, and we want another small function to render the elapsed time to the DOM.</p>
+            <pre><code class="fsharp">let startSessionButton (model: IStore&lt;Model&gt;) dispatch =
+  Bind.el ((model |&gt; Store.map (fun m -&gt; (m.Running, List.isEmpty m.TimerStepsReversed)) |&gt; Store.distinct), 
+    fun (running, noSteps) -&gt;
+      if running || noSteps then
+        Html.text &quot;&quot;
+      else 
+        Html.button [
+            type' &quot;button&quot;
+            onClick (fun _ -&gt; dispatch StartSession) []
+            Html.text &quot;Start session&quot;
+        ]
+  )
+  
+let showElapsedTime (model: IStore&lt;Model&gt;) dispatch =
+  Bind.el ((model |&gt; Store.map getElapsedTime), fun elapsedTime -&gt;
+            Html.div (formatElapsedTime elapsedTime)
+          )
+</code></pre>
+            <p>Now we need to add it to our main view function:</p>
+            <pre><code class="fsharp">let view() =
+  (...)
+  Html.div [
+    Html.div [
+      (...)
+      startSessionButton model dispatch
+      showElapsedTime model dispatch
+    ]
+  ]
+</code></pre>
+            <p>The last step here is to extend our Message type and handle the new <code class="inline">StartSession</code> message in
+                the update function again:</p>
+            <pre><code class="fsharp">type Message =
+  (...)
+  | StartSession
+</code></pre>
+            <p>But now we run into a problem: We want to get the StartTime when starting the session, and we want there
+                to be a tick each second to advance the timer and go through the steps. But our simple elmish
+                architecture does not yet support side-effects!</p>
+            <p>For this there is the data type <code class="inline">Cmd</code> (which stands for Command). We can tell Sutil that we
+                want to have Cmds now as additional possible return values from the update function instead of just the
+                model.</p>
+            <p>For this we need to change how our program is initialized:</p>
+            <pre><code class="fsharp">// old
+let model, dispatch = () |&gt; Store.makeElmishSimple init update ignore
+
+// new
+let model, dispatch = () |&gt; Store.makeElmish init update ignore
+</code></pre>
+            <p>Now the compiler tells us about a lot of necessary changes: Our init function needs to return a tuple now
+                with a Cmd for when we want to do some side-effect right at the start of our program. We don't want to
+                do this, so we can use <code class="inline">Cmd.none</code>.</p>
+            <pre><code class="fsharp">let init () : Model * Cmd&lt;Message&gt;= ({ 
+    (...)
+    }, Cmd.none)
+</code></pre>
+            <p>Next, the signature and all the return values in all branches of our update function need to change. Here
+                just one branch is shown for brevity:</p>
+            <pre><code class="fsharp">let update (msg : Message) (model : Model) : (Model * Cmd&lt;Message&gt;) =
+  (...)
+  | StartSession -&gt;
+      (model, Cmd.none)
+</code></pre>
+            <p>We now need to get the correct starting time within the update function. And as we define what the update
+                function is and how it's called we can extend it with a function parameter that we can call to get the
+                current time. This breaks the original Elm Architecture, because it's a side-effect hidden within the
+                update function! In Elm we'd do this with a <a
+                    href="https://guide.elm-lang.org/effects/time.html">Subscription</a> to get notified of time
+                changes, but I have not found a way to do this in Sutil.
+                We'll use <a
+                    href="https://trustbit.tech/blog/2020/11/30/introduction-to-partial-function-application-in-f-sharp">partial
+                    application</a> to give the time getter function into the update function and leave the rest of the
+                arguments open for Sutil to fill, and we want to wrap our int64 Ticks property into our Ticks type to
+                give it a more semantic name:</p>
+            <pre><code class="fsharp">let update (getNow : unit -&gt; Ticks) (msg : Message) (model : Model) : (Model * Cmd&lt;Message&gt;) =
+  (...)
+  | StartSession -&gt;
+      let now = getNow ()
+      ({model with Running = true; StartTime = now; }, Cmd.none)
+
+let view() =
+  let model, dispatch = () |&gt; Store.makeElmish init (update (fun () -&gt; Ticks System.DateTime.UtcNow.Ticks)) ignore
+  (...)     
+</code></pre>
+            <p>Now we must extend StartSession to include our initial PlayPlan calculation. For this we go backwards
+                through the list of all steps with <code class="inline">foldBack</code> and call a helper function that calculates the
+                end time of each step based on the initial starting time for the first one and the end time of the
+                previous step for each new step afterwards. We have to do some value unwrapping and rewrapping with our
+                Ticks type, but in general it's so easy and convenient to create types even for small things in F# I
+                recommend doing it a lot. I even created a new type just for the interim state in the
+                <code class="inline">foldBack</code>!</p>
+            <pre><code class="fsharp">type PlayPlanCalculation = {
+    PreviousStepEnd : Ticks
+    CalculatedSteps : StepWithEndTime list
+}
+
+let calculateNextTimerStep (timerStep : TimerStep) (state : PlayPlanCalculation) : PlayPlanCalculation =
+  // let minutesInTicks = (int64)timerStep.Minutes * System.TimeSpan.TicksPerMinute
+  let minutesInTicks = (int64)timerStep.Minutes * System.TimeSpan.TicksPerMinute / 10L // for DEBUG
+
+  // unwrap int64 value
+  let (Ticks previousStepEnd) = state.PreviousStepEnd
+
+  // calculate end and wrap again in Ticks type
+  let stepEndsAt =  previousStepEnd + minutesInTicks |&gt; Ticks
+
+  // update the state we thread through each iteration
+  let withEndTime = {Step = timerStep; EndTime =  stepEndsAt}
+  { state with PreviousStepEnd = stepEndsAt; CalculatedSteps = withEndTime :: state.CalculatedSteps}
+    
+let update getNow msg model : (Model * Cmd&lt;Message&gt;) =
+  (...)
+  | StartSession -&gt;
+    let now = getNow ()
+
+    let calculatedSteps = 
+      (List.foldBack  calculateNextTimerStep
+                      model.TimerStepsReversed 
+                      { PreviousStepEnd = now; CalculatedSteps = []})
+          .CalculatedSteps // only take final result
+          |&gt; List.rev // put them in the right order   
+
+    // build initial PlayPlan
+    let playPlan = {
+      PlayPlan.CurrentStep = calculatedSteps |&gt; List.head
+      RemainingSteps = calculatedSteps |&gt; List.tail
+    }
+
+    ({model with Running = true; StartTime = now; PlayPlan = Some playPlan}, Cmd.none)
+</code></pre>
+            <p>Now we just need a way to create a new message each second. For this we can use one of the numerous <a
+                    href="https://github.com/davedawkins/Sutil/blob/main/src/Sutil/Types.fs#L89">Cmd helper
+                    functions</a> Sutil provides to replace the <code class="inline">Cmd.none</code> we have been using until now from
+                our StartSession handler:</p>
+            <pre><code class="fsharp">  // build Cmd to dispatch TimerTick message after approximately 1 second (JavaScript is not exact in its timings)
+  let timerCmd = Cmd.OfAsync.perform (fun _ -&gt; Async.Sleep 1_000) () (fun _ -&gt; TimerTick)
+  ({model with Running = true; StartTime = now; PlayPlan = Some playPlan}, timerCmd)
+</code></pre>
+            <p>Sutil will then call our update function again after the Cmd executes and generates the new Message. We
+                don't have to think about this. And as we express the side-effect we want as data instead of executing
+                it directly we can also test for the correct result of the update function more easily!</p>
+            <p>We'll add TimerTick to our Message type and just do nothing in its update function for now - we will
+                extend this in the next increment.</p>
+            <pre><code class="fsharp">type Message =
+  (...)
+  | TimerTick
+    
+let update getNow msg model : (Model * Cmd&lt;Message&gt;) =
+  (...)
+  | TimerTick -&gt; 
+        (model, Cmd.none)
+</code></pre>
+            <h2>Fifth increment: Making the time pass</h2>
+            <p>And now for the tricky bit: Making it tick again each second, but only if the timer is still running and
+                there are steps left - and handling the different cases for what happens.</p>
+            <p>All of this is concentrated in the update function branch where we handle the TimerTick message. It's not
+                complicated per se, but we do need to think about the cases:</p>
+            <ol>
+                <li>Our current step ends, but we don't have any steps left</li>
+                <li>Our current step ends, and we have at least one other step left</li>
+                <li>We are in the middle of a step</li>
+            </ol>
+            <p>For step 1 we need to play the sound attached to the step and stop the passage of time. For step 2 we
+                need to play the sound, update our PlayPlan and continue with the TimerTicks. And for step 3 we only
+                need to continue when the timer ticks.</p>
+            <p>Oh, and all of this should only happen if our PlayPlan actually exists (the Option is not in the
+                &quot;Nothing&quot; case, but in the &quot;Some PlayPlan&quot; case instead). We use the fact that
+                Option is a <a href="https://dev.to/shimmer/functors-in-f-2fd7">Functor</a> and thus gives us a nice map
+                function with <code class="inline">Option.map</code>, which only applies its inner function if there is a value in the
+                Option. Plus we create a &quot;do nothing at all&quot;-fallback with the
+                <code class="inline">Option.defaultValue</code> function.</p>
+            <pre><code class="fsharp">let update getNow msg model : (Model * Cmd&lt;Message&gt;) =
+  (...)
+  | TimerTick -&gt; 
+    model.PlayPlan
+    |&gt; Option.map (fun playPlan -&gt; // only do something if the PlayPlan exists
+      // unwrap all the data
+      let (Ticks now) = getNow ()
+      let (Ticks currentStepEndTime) = playPlan.CurrentStep.EndTime
+      let (Ticks startTime) = model.StartTime
+
+      // Case 1: Our final step has just ended
+      if List.isEmpty playPlan.RemainingSteps &amp;&amp; currentStepEndTime &lt; now then
+        ({model with Running = false; PlayingSound = Some playPlan.CurrentStep.Step.Sound}, Cmd.none)
+      else
+        // prepare the next tick
+        let tickCmd = Cmd.OfAsync.perform (fun _ -&gt; Async.Sleep 1_000) () (fun _ -&gt; TimerTick)
+
+        // update the elapsed time in the model here to avoid code duplication later
+        let elapsedTime = now - startTime
+        let modelWithNewElapsedTime = {model with ElapsedTimeSinceStart = Ticks elapsedTime}
+
+        if (currentStepEndTime &lt; now) then
+          let newPlayPlan = 
+            // Case 2: we have another step we need to move into our CurrentStep property
+            let newPlayPlan = 
+              {
+                PlayPlan.CurrentStep = List.head playPlan.RemainingSteps; 
+                RemainingSteps = List.tail playPlan.RemainingSteps
+              }
+          
+          ({modelWithNewElapsedTime with PlayPlan = Some newPlayPlan; PlayingSound = Some playPlan.CurrentStep.Step.Sound}, tickCmd)
+        else
+          // Case 3: just continue with another tick in 1 second
+          (modelWithNewElapsedTime, tickCmd)
+    ) 
+    // fall back to &quot;do nothing&quot; if the PlayPlan does not exist
+    |&gt; Option.defaultValue (model, Cmd.none)
+</code></pre>
+            <p>We also set a new property in our Model for when we want to play a sound. So naturally we need to extend
+                said Model and its helper functions:</p>
+            <pre><code class="fsharp">type Model = { 
+    (...)
+    PlayingSound : Sound option
+    }
+(...)
+let getPlayingSound m = m.PlayingSound
+
+let init () : Model * Cmd&lt;Message&gt; = ({ 
+    (...)
+    PlayingSound = None
+    }, Cmd.none)
+</code></pre>
+            <p>Now our time advances after we start the session and we move through the steps one by one until none are
+                left. Reminder: For debugging purposes we shorten each step by the factor of 10, so a one minute step is
+                finished after six seconds.</p>
+            <h2>Last increment: Playing a sound and cleanup</h2>
+            <p>The final thing we have to add is audio playback. Luckily HTML has an element just for this, and Sutil
+                directly supports it: The <a
+                    href="https://developer.mozilla.org/en-US/docs/Web/HTML/Element/audio">audio tag</a>.</p>
+            <p>We already extended our Model in the last increment to be able to store the sound we want to play in
+                <code class="inline">PlayingSound</code>, so we can add another sub-view function to create an audio tag on demand:</p>
+            <pre><code class="fsharp">let audioPlayback (model: IStore&lt;Model&gt;) dispatch =
+  Bind.el ((model |&gt; Store.map getPlayingSound |&gt; Store.distinct), fun sound -&gt; 
+      match sound with
+      | None -&gt; Html.text &quot;&quot;
+      | Some s -&gt; Html.audio [    
+            on &quot;ended&quot; (fun _ -&gt; dispatch SoundEnded) []
+            Attr.autoPlay true
+            Attr.src (soundToFile s) 
+          ]
+    )
+</code></pre>
+            <p>A few things are of note here: We need to pipe our transformed value from the store into
+                <code class="inline">Store.distinct</code>, because otherwise the tag would be recreated every time the model changes,
+                because the store emits a new value even if it is the same as the last value. Combined with
+                <code class="inline">Attr.autoPlay true</code> this would restart any running sound if anything in the model changes
+                while it is played back!</p>
+            <p>We also use the <code class="inline">soundToFile</code> function we created earlier to map to filenames as the source.
+                And finally we register a custom event handler for the <code class="inline">ended</code> event of the audio tag and
+                dispatch a new Message to clear the Model from the sound to be played back after playback has finished.
+            </p>
+            <p>Of course that means we need to extend our Message type one final time and handle the new message in the
+                update function:</p>
+            <pre><code class="fsharp">type Message =
+    (...)
+    | SoundEnded
+    
+let update getNow msg model : (Model * Cmd&lt;Message&gt;) =
+  (...)
+  | SoundEnded -&gt;
+      ({model with PlayingSound = None}, Cmd.none)
+</code></pre>
+            <p>Oh, and we need to add our new partial view to the main view to get it to actually render, too:</p>
+            <pre><code class="fsharp">let view() =
+  (...)
+  
+  Html.div [
+    Html.div [
+      (...)
+      audioPlayback model dispatch
+    ]
+  ]
+</code></pre>
+            <p>Now our meditation session timer is feature complete! We can add steps with different durations and
+                sounds, we can go through our session plan after starting it and when each step ends a sound is played.
+                It's time for a final pass through our app to improve the User Experience a bit (and avoid needing to
+                add more complicated cases to handle for us): Some parts of the page should not be rendered while the
+                timer is running.</p>
+            <p>For this we'll use the awesomeness of F# and its <a
+                    href="https://fsharpforfunandprofit.com/posts/type-inference/">type inference</a> and partial
+                application once more and write a small reusable helper function to only render a sub-view if our timer
+                is not running:</p>
+            <pre><code class="fsharp">let ifNotRunning model viewFn =
+  Bind.el ((model |&gt; Store.map getRunning), fun running -&gt;
+    if running then
+        Html.text &quot;&quot;
+    else
+        viewFn)
+</code></pre>
+            <p>We don't need to write any verbose type definitions for the parameters, F# just knows what's up. And now
+                we can partially apply this function in the main view and use it every where we need it, even if we
+                extend the app later with more sub-views:</p>
+            <pre><code class="fsharp">let view() =
+  (...)
+  let ifNotRunning' = ifNotRunning model
+
+  Html.div [
+      Html.div [
+          ifNotRunning' (planEditView model dispatch)
+          (...)
+      ]
+  ]
+</code></pre>
+            <p>Now we are truly done! It's time to build our whole app for deployment, which we will do in our final
+                chapter.</p>
+            <h2>Prepare for deployment</h2>
+            <p>The out-of-the-box tooling in Sutil allows us a production-ready build for our simple app with one
+                console command: We run <code class="inline">npm run build</code>, wait a few seconds and then get the built JavaScript
+                as <code class="inline">bundle.js</code> in the <code class="inline">public</code> folder. The configuration for this is in the
+                <code class="inline">webpack.config.js</code> file and can be extended with more Webpack configuration if needed.</p>
+            <p>The JavaScript is around 31 KB (minified and compressed) which I consider reasonable. We can now upload
+                the whole public folder to a static web host of our choice, e.g. something like <a
+                    href="https://surge.sh/">surge.sh</a> or <a href="https://www.netlify.com/">netlify</a>. I did
+                upload it <a href="https://elm.finde-ich-super.de/sutil-meditation-timer/">to my own self-hosted
+                    website</a>.</p>
+            <h2>Conclusion</h2>
+            <p>Overall F# has been a pleasure to work with, as usual. It's a beautiful and powerful language and the
+                editor support via <a href="https://ionide.io/">Ionide</a> in VSCode has improved a lot in the last
+                year. For commercial use I'd still prefer using <a href="https://www.jetbrains.com/rider/">JetBrains
+                    Rider</a> because it is a bit more reliable in its F# support.</p>
+            <p>Working with Sutil was a mixed bag for me: It's still in beta, which mostly shows in the lack of
+                documentation and in that a few things are not implemented yet. This was doubly true for me as I didn't
+                have any experience working with Fable before starting this project. I like Svelte's ideas and of course
+                I like writing F#. I think Sutil will be a great addition to the F#-to-JavaScript ecosystem once the
+                documentation is updated.</p>
+            <p>As of now I personally will continue to use F# for server programming in my private projects. But for the
+                frontend I'll probably use Svelte directly. Or if I have a lot of UI state and few library dependencies
+                reach for Elm and get The Elm Architecture and all its guarantees in its purest form. Still I advise you
+                to look into Fable and the libraries built on top of it at least once in a small toy project like the
+                one we did here to get a feeling for what's possible and get a fresh perspective.</p>
+            <p>I wish you all a happy and healthy December, a merry christmas and many serene sitting sessions with our
+                meditation timer written with Sutil!</p>
+            <h2>Thanks</h2>
+            <p>Thanks to <a href="https://twitter.com/sergey_tihon">Sergey Tihon</a> for organizing the <a
+                    href="https://sergeytihon.com/2021/10/18/f-advent-calendar-2021/">F# Advent</a> calendar, and thanks
+                to <a href="https://twitter.com/drechsler">Patrick</a> and <a
+                    href="https://twitter.com/fonzygruen">Christian</a> for proof-reading!</p>
+        </article>
 
         <article id="vortrag_codedays_2021">
             <h2>Vortrag zu Angular auf den CodeDays Digital</h2>
