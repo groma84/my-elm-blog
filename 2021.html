@@ -167,6 +167,11 @@ let update (msg : Message) (model : Model) : Model =
   }
     
 let getTimerSteps m = m.TimerStepsReversed |&gt; List.rev    
+
+let init () : Model = ({
+    LastTimerValue = 1
+    TimerStepsReversed = []
+  })
 </code></pre>
             <p>We also need the new record type <code class="inline">TimerStep</code> and a way to express the diffent possible sounds.
                 Oh, and a few helper functions for unique ID generation from Sutil. As F# is always parsed from top to
@@ -400,7 +405,7 @@ let showElapsedTime (model: IStore&lt;Model&gt;) dispatch =
             <p>For this there is the data type <code class="inline">Cmd</code> (which stands for Command). We can tell Sutil that we
                 want to have Cmds now as additional possible return values from the update function instead of just the
                 model.</p>
-            <p>For this we need to change how our program is initialized:</p>
+            <p>For this we need to change how our store is initialized:</p>
             <pre><code class="fsharp">// old
 let model, dispatch = () |&gt; Store.makeElmishSimple init update ignore
 
@@ -520,8 +525,8 @@ let update getNow msg model : (Model * Cmd&lt;Message&gt;) =
                 <li>Our current step ends, and we have at least one other step left</li>
                 <li>We are in the middle of a step</li>
             </ol>
-            <p>For step 1 we need to play the sound attached to the step and stop the passage of time. For step 2 we
-                need to play the sound, update our PlayPlan and continue with the TimerTicks. And for step 3 we only
+            <p>For case 1 we need to play the sound attached to the step and stop the passage of time. For case 2 we
+                need to play the sound, update our PlayPlan and continue with the TimerTicks. And for case 3 we only
                 need to continue when the timer ticks.</p>
             <p>Oh, and all of this should only happen if our PlayPlan actually exists (the Option is not in the
                 &quot;Nothing&quot; case, but in the &quot;Some PlayPlan&quot; case instead). We use the fact that
