@@ -105,7 +105,8 @@ let init () : Model= ({ LastTimerValue = 1 })
             <p>Next we'll create a new function that returns a partial view. The store is a data structure used by Sutil
                 to allow us to subscribe to value changes and thus add reactivity to our application. The dispatch
                 function is needed to dispatch Messages from events in the view to the update function.</p>
-            <pre><code class="fsharp">  Html.ul [
+            <pre><code class="fsharp">let planEditView model dispatch =
+    Html.ul [
       Html.li [
         Html.label [Html.text &quot;How many minutes should the next timer last?&quot;]
         Html.input  [
