@@ -18,8 +18,8 @@
 
 <body>
     <header id="header">
-        <h1>Elm (und Elixir, und anderes Zeugs) - finde ich super!</h1>
-        <menu-component></menu-component>
+            <h1 >Elm (und Elixir, und anderes Zeugs) - finde ich super!</h1>
+            <menu-component></menu-component>
     </header>
     <section id="main-content">
         <article id="serene-sitting-with-sutil">
@@ -57,7 +57,7 @@
                 a duration in minutes and one of two sounds that is played when the duration is up. Multiple steps can
                 be queued before the session gets started.</p>
             <p>In the end it will look like this:
-                <img src="./screenshot_sutil-meditation-timer_1.png" alt="The finished app">
+                <img src="./screenshot_sutil-meditation-timer_1.png" alt="The finished app" loading="lazy">
             </p>
             <p>We won't be doing any styling and will only do very basic functionality to keep the code size and
                 complexity in check. We will also sacrifice writing tests (don't do this in any real project!) for
@@ -75,7 +75,7 @@
                 are then sent to the update function that returns a changed model. The parts of the view we have marked
                 as reactive are updated and the cycle starts anew. In Sutil the view function is only called once, but
                 everything that is reactive within the view gets updated when the value it is bound to changes.
-                <img src="./sutil-app-architecture-1.svg" alt="Sutil App Architecture">
+                <img src="./sutil-app-architecture-1.svg" alt="Sutil App Architecture" loading="lazy">
             </p>
             <p>The empty project, but with all the resources we need, can be cloned most easily with
                 <code class="inline">npx degit MATHEMA-GmbH/blog-fsharp-sutil-mgrotz#fresh-start blog-fsharp-sutil-mgrotz</code>.

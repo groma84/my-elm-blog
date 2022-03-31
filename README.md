@@ -1,6 +1,13 @@
 # my-elm-blog
 The stuff for my own blog
 
+# TODO
+- replace web component with a simple node script to copy the component inside the html for each page
+- create a html snippet that gets copied via node script containing the html head, which is always the same
+- remove ie11iscrap.js
+- improve styling
+- write a new blogpost, so 2022.html actually gets content...
+
 ## Deployment 
 On the webserver an Apache redirect rule redirects from index.html to the last active year (e.g. 2021.html).
 This allows links to work in the future, but index.html still "seems to work".

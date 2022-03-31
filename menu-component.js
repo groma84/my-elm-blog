@@ -17,7 +17,7 @@ const MenuComponent = {
         <nav>
             <ul>
                 <li class="${getActivePage('2021') && 'active'}">
-                    <a href="2021.html">Blog</a>
+                    <a href="2021.html" class="button">Blog</a>
                 </li>
                 <li class="${getActivePage('2020') && 'active'}">
                     <a href="2020.html">2020</a>
@@ -54,40 +54,6 @@ const MenuComponent = {
     </div>
 
     <style>
-        .menu {
-            display: flex;
-            justify-content: space-between;
-        }
-
-        .social_media_stuff > ul {
-            display: flex;
-            list-style: none;
-            margin: 0;
-            padding: 0;
-        }
-
-        .social_media_stuff > ul > li {
-            margin: 0.5rem;
-            padding: 0.5rem;
-            background-color: lightblue;
-        }
-
-        nav > ul {
-            display: flex;
-            list-style: none;
-            margin: 0;
-            padding: 0;
-        }
-        
-        nav > ul > li {
-            margin: 0.5rem;
-            padding: 0.5rem;
-            background-color: lightblue;
-        }
-
-        nav > ul > li.active {
-            font-weight: bold;
-        }
     
     </style>
     `
