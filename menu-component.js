@@ -16,6 +16,9 @@ const MenuComponent = {
     <div class="menu">
         <nav>
             <ul>
+                <li class="${getActivePage('2023') && 'active'}">
+                    <a href="2023.html">Blog</a>
+                </li>
                 <li class="${getActivePage('2022') && 'active'}">
                     <a href="2022.html">Blog</a>
                 </li>
