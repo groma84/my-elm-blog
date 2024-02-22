@@ -20,7 +20,7 @@ const MenuComponent = {
                     <a href="2024.html">Blog</a>
                 </li>
                 <li class="${getActivePage('2023') && 'active'}">
-                    <a href="2023.html">Blog</a>
+                    <a href="2023.html">2023</a>
                 </li>
                 <li class="${getActivePage('2022') && 'active'}">
                     <a href="2022.html">2022</a>
