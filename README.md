@@ -24,6 +24,10 @@ This needs to be updated every year!
 
 #### Redirect index.html to 2021.html
 
+
+File: /etc/apache2/sites-available/011-elm-ssl.conf
+Replace Redirect target in "Redirect 301" line
+
 <IfModule mod_ssl.c>
     <VirtualHost elm.finde-ich-super.de:443>
         ServerName elm.finde-ich-super.de
